@@ -6,6 +6,8 @@ import { ModalInscribirLlave } from '../../components/molecules/ModalInscribirLl
 import { bancosService, type MedioDePago } from '../../services/bancosService';
 import { Icon } from '../../components/atoms/Icon/Icon';
 import type { InvoiceItemData } from '../../components/molecules/InvoiceCard/InvoiceCard';
+import { useNavigate } from 'react-router-dom';
+import type { DatosTransaccion } from '../../types/transaccion';
 
 interface PagarFacturaScreenProps {
   providerInvoice: InvoiceItemData;
@@ -36,6 +38,7 @@ export const PagarFacturaScreen: React.FC<PagarFacturaScreenProps> = ({
   providerInvoice,
   onBackToHome
 }) => {
+  const navigate = useNavigate();
   const [step, setStep] = useState<1 | 2>(1);
   const [selectedInvoice, setSelectedInvoice] = useState<InvoiceDetail | null>(null);
 
@@ -45,7 +48,6 @@ export const PagarFacturaScreen: React.FC<PagarFacturaScreenProps> = ({
   const [selectedMethodId, setSelectedMethodId] = useState<string>('');
   const [mediosDePago, setMediosDePago] = useState<MedioDePago[]>([]);
   const [isModalInscribirOpen, setIsModalInscribirOpen] = useState(false);
-  const [paymentSuccess, setPaymentSuccess] = useState(false);
 
   // Obtener facturas disponibles para el proveedor seleccionado
   const availableInvoices: InvoiceDetail[] =
@@ -82,8 +84,35 @@ export const PagarFacturaScreen: React.FC<PagarFacturaScreenProps> = ({
 
   // Ejecutar el pago
   const handlePagarFactura = () => {
-    if (!selectedMethodId) return;
-    setPaymentSuccess(true);
+    if (!selectedMethodId || !selectedInvoice) return;
+
+    const metodoSeleccionado = mediosDePago.find((m) => m.id === selectedMethodId);
+    const valorFinal =
+      paymentType === 'total'
+        ? selectedInvoice.amount
+        : `$${Number(customAmount || 0).toLocaleString('es-CO')}`;
+
+    const now = new Date();
+    const meses = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+    const dia = now.getDate();
+    const mes = meses[now.getMonth()];
+    const anio = now.getFullYear();
+    const horas = String(now.getHours()).padStart(2, '0');
+    const minutos = String(now.getMinutes()).padStart(2, '0');
+    const fechaHora = `${dia} ${mes} ${anio} ${horas}:${minutos}`;
+
+    const datosTransaccion: DatosTransaccion = {
+      idFactura: selectedInvoice.invoiceNumber,
+      valor: valorFinal,
+      empresa: providerInvoice.providerName.includes('Alpina')
+        ? 'Alpina Productos Alimenticios S.A.'
+        : providerInvoice.providerName,
+      pagador: 'Miscelanea Rin-Rin',
+      medioPago: metodoSeleccionado?.nombre || 'Llave Bre-B',
+      fechaHora: fechaHora
+    };
+
+    navigate('/transaccion', { state: { datos: datosTransaccion } });
   };
 
   // Total balance a mostrar en Paso 1 (e.g., "$345.678,00")
@@ -324,49 +353,6 @@ export const PagarFacturaScreen: React.FC<PagarFacturaScreenProps> = ({
           onClose={() => setIsModalInscribirOpen(false)}
           onLlaveInscrita={handleNuevaLlaveInscrita}
         />
-
-        {/* Modal de Éxito al Pagar */}
-        {paymentSuccess && selectedInvoice && (
-          <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-2xs flex items-center justify-center p-4">
-            <div className="bg-white rounded-3xl p-6 max-w-xs w-full shadow-2xl border border-slate-100 text-center animate-in fade-in zoom-in duration-200">
-              <div className="w-14 h-14 rounded-full bg-emerald-50 text-emerald-600 border border-emerald-100 flex items-center justify-center mx-auto mb-4">
-                <Icon name="check" size={28} stroke={2.5} />
-              </div>
-
-              <h3 className="font-bold text-slate-900 text-lg">¡Pago Exitoso!</h3>
-              <p className="text-xs text-slate-500 mt-1 mb-4">
-                Tu pago a {providerInvoice.providerName} ha sido procesado correctamente.
-              </p>
-
-              <div className="bg-slate-50 rounded-2xl p-3.5 text-xs flex flex-col gap-2 mb-5 text-left">
-                <div className="flex justify-between">
-                  <span className="text-slate-500">Factura No:</span>
-                  <span className="font-bold text-slate-900">{selectedInvoice.invoiceNumber}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-500">Valor Pagado:</span>
-                  <span className="font-extrabold text-[#1B2075]">
-                    {paymentType === 'total' ? selectedInvoice.amount : `$${Number(customAmount).toLocaleString('es-CO')}`}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-500">Medio:</span>
-                  <span className="font-bold text-slate-900">
-                    {mediosDePago.find((m) => m.id === selectedMethodId)?.nombre}
-                  </span>
-                </div>
-              </div>
-
-              <button
-                type="button"
-                onClick={onBackToHome}
-                className="w-full py-3 bg-[#2F399B] hover:bg-[#252e80] text-white font-bold rounded-xl text-sm transition-colors cursor-pointer"
-              >
-                Volver al Inicio
-              </button>
-            </div>
-          </div>
-        )}
 
       </div>
     </div>
