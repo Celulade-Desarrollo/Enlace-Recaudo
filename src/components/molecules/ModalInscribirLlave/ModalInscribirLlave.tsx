@@ -20,15 +20,13 @@ export const ModalInscribirLlave: React.FC<ModalInscribirLlaveProps> = ({
   const [error, setError] = useState('');
 
   useEffect(() => {
-    if (isOpen) {
-      bancosService.getBancos().then((data) => {
-        setBancos(data);
-        if (data.length > 0 && !selectedBanco) {
-          setSelectedBanco(data[0]);
-        }
-      });
-      setError('');
-    }
+    if (!isOpen) return;
+    bancosService.getBancos().then((data) => {
+      setBancos(data);
+      if (data.length > 0) {
+        setSelectedBanco((prev) => prev || data[0]);
+      }
+    });
   }, [isOpen]);
 
   if (!isOpen) return null;
@@ -50,7 +48,7 @@ export const ModalInscribirLlave: React.FC<ModalInscribirLlaveProps> = ({
       onLlaveInscrita(nueva);
       setValorLlave('');
       onClose();
-    } catch (err) {
+    } catch {
       setError('Error al inscribir la llave. Intenta nuevamente.');
     } finally {
       setLoading(false);
