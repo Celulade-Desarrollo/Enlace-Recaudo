@@ -1,10 +1,6 @@
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
-
 .pantalla-wrapper * {
   box-sizing: border-box;
-  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  margin: 0;
-  padding: 0;
+  font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
 .pantalla-wrapper {
@@ -14,133 +10,168 @@
   background-color: #ffffff;
   display: flex;
   flex-direction: column;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
 }
 
+/* Header Móvil: Compacto, respetando notch/safe area sin desperdiciar altura */
 .header-pago {
   background-color: #353ab3;
   color: #ffffff;
-  padding: calc(56px + env(safe-area-inset-top, 0px)) 22px 28px 22px;
+  padding: calc(16px + env(safe-area-inset-top, 0px)) 16px 18px 16px;
   flex-shrink: 0;
 }
 
 .pantalla-wrapper .titulo-header {
   text-align: center;
-  font-size: 18px;
+  font-size: 17px;
   font-weight: 700;
   letter-spacing: -0.2px;
   color: #ffffff;
 }
 
 .zigzag-border {
-  height: 14px;
+  height: 12px;
   width: 100%;
   background-color: #353ab3;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='14' viewBox='0 0 24 14'%3E%3Cpath d='M0 14 L12 0 L24 14 Z' fill='white'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='12' viewBox='0 0 24 12'%3E%3Cpath d='M0 12 L12 0 L24 12 Z' fill='white'/%3E%3C/svg%3E");
   background-repeat: repeat-x;
-  background-size: 24px 14px;
+  background-size: 24px 12px;
   background-position: center bottom;
   flex-shrink: 0;
-  margin-top:-1
+  margin-top: -1px;
 }
 
+/* Contenido Principal Móvil */
 .contenido-pago {
   flex: 1;
   display: flex;
   justify-content: center;
   background-color: #ffffff;
-  padding: 12px 22px calc(16px + env(safe-area-inset-bottom, 0px)) 22px;
+  padding: 14px 18px calc(16px + env(safe-area-inset-bottom, 0px)) 18px;
+  min-height: 0;
 }
 
-.contenido-interno {
+.transaccion-aprob-wrapper .contenido-interno {
   width: 100%;
-  max-width: 440px;
+  max-width: 400px;
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
+  flex: 1;
 }
 
-.check-container {
-  width: 58px;
-  height: 58px;
+/* Icono de verificación */
+.transaccion-aprob-wrapper .check-container {
+  width: 48px;
+  height: 48px;
   border-radius: 50%;
   border: 2.5px solid #0e9347;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 12px;
+  margin-bottom: 8px;
   background-color: #ffffff;
   flex-shrink: 0;
 }
 
-.subtitulo-estado {
-  font-size: 18px;
+.transaccion-aprob-wrapper .subtitulo-estado {
+  font-size: 17px;
   font-weight: 700;
   color: #111827;
-  margin-bottom: 10px;
+  margin-bottom: 4px;
 }
 
-.label-valor {
-  font-size: 14px;
+.transaccion-aprob-wrapper .label-valor {
+  font-size: 12.5px;
   color: #6b7280;
-  font-weight: 400;
+  font-weight: 500;
+  margin-bottom: 2px;
 }
 
-.monto-valor {
-  font-size: 32px;
+.transaccion-aprob-wrapper .monto-valor {
+  font-size: 28px;
   font-weight: 800;
   color: #000000;
-  letter-spacing: -0.8px;
-  margin-bottom: 10px;
+  letter-spacing: -0.6px;
+  margin-bottom: 4px;
 }
 
-.nombre-empresa {
-  font-size: 12.5px;
-  font-weight: 800;
+.transaccion-aprob-wrapper .nombre-empresa {
+  font-size: 13px;
+  font-weight: 700;
   color: #111827;
+  margin-bottom: 8px;
+}
+
+.transaccion-aprob-wrapper .descripcion-texto {
+  font-size: 12px;
+  color: #4b5563;
+  line-height: 1.42;
+  max-width: 300px;
   margin-bottom: 12px;
 }
 
-.descripcion-texto {
-  font-size: 12px;
-  color: #1f2937;
-  line-height: 1.5;
-  max-width: 300px;
-  margin-bottom: 14px;
-}
-
-.qr-container {
-  padding: 4px;
+/* Contenedor e imagen QR optimizados para escaneo desde otro móvil */
+.transaccion-aprob-wrapper .qr-container {
+  padding: 10px;
   background: #ffffff;
-  margin-bottom: 10px;
+  border-radius: 16px;
+  border: 1px solid #edf0f5;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05);
+  margin-top: 6px;
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-.qr-image {
-  width: clamp(130px, 38vw, 180px);
-  height: auto;
+.transaccion-aprob-wrapper .qr-container:active {
+  transform: scale(0.98);
+}
+
+.transaccion-aprob-wrapper .qr-image {
+  width: 140px;
+  height: 140px;
+  max-width: 38vw;
   aspect-ratio: 1 / 1;
   display: block;
+  border-radius: 6px;
 }
 
-.btn-descargar {
-  background: none;
-  border: none;
+/* Botón Descargar secundario */
+.transaccion-aprob-wrapper .btn-descargar {
+  background-color: #f7f8fd;
+  border: 1px solid #e3e6f8;
   color: #353ab3;
-  font-size: 13px;
+  font-size: 12.5px;
   font-weight: 600;
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: 6px;
   cursor: pointer;
-  margin-bottom: auto;
-  padding: 6px 12px;
+  margin-top: 2px;
+  margin-bottom: 14px;
+  padding: 8px 16px;
+  border-radius: 20px;
+  transition: all 0.2s ease;
 }
 
-.grupo-botones {
+.transaccion-aprob-wrapper .btn-descargar:active {
+  background-color: #edf1fc;
+}
+
+/* Botones principales de acción táctil móvil */
+.transaccion-aprob-wrapper .grupo-botones {
   display: flex;
   gap: 12px;
   width: 100%;
-  margin-top: 20px;
+  margin-top: auto;
+  padding-top: 10px;
+  margin-bottom: 4px;
   flex-shrink: 0;
 }
 
@@ -150,13 +181,16 @@
   height: 46px;
   border-radius: 23px;
   font-size: 14px;
-  font-weight: 600;
+  font-weight: 700;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 6px;
   cursor: pointer;
-  transition: opacity 0.2s;
+  padding: 0 8px;
+  transition: opacity 0.2s, transform 0.15s ease;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .btn-regresar {
@@ -174,26 +208,111 @@
 .btn-regresar:active,
 .btn-compartir:active {
   opacity: 0.85;
+  transform: scale(0.98);
+}
+
+/* Pantallas móviles muy compactas (ej. iPhone SE 667px o altura reducida) */
+@media (max-height: 660px) {
+  .header-pago {
+    padding: calc(12px + env(safe-area-inset-top, 0px)) 14px 12px 14px;
+  }
+
+  .transaccion-aprob-wrapper .check-container {
+    width: 38px;
+    height: 38px;
+    margin-bottom: 4px;
+  }
+
+  .transaccion-aprob-wrapper .subtitulo-estado {
+    font-size: 15px;
+    margin-bottom: 2px;
+  }
+
+  .transaccion-aprob-wrapper .monto-valor {
+    font-size: 22px;
+    margin-bottom: 2px;
+  }
+
+  .transaccion-aprob-wrapper .nombre-empresa {
+    font-size: 12px;
+    margin-bottom: 4px;
+  }
+
+  .transaccion-aprob-wrapper .descripcion-texto {
+    font-size: 11px;
+    line-height: 1.35;
+    margin-bottom: 6px;
+  }
+
+  .transaccion-aprob-wrapper .qr-container {
+    padding: 6px;
+    margin-top: 2px;
+    margin-bottom: 6px;
+  }
+
+  .transaccion-aprob-wrapper .qr-image {
+    width: 110px;
+    height: 110px;
+  }
+
+  .transaccion-aprob-wrapper .btn-descargar {
+    margin-bottom: 6px;
+    padding: 6px 12px;
+    font-size: 11.5px;
+  }
+
+  .transaccion-aprob-wrapper .grupo-botones {
+    padding-top: 4px;
+  }
+
+  .btn-regresar,
+  .btn-compartir {
+    height: 40px;
+  }
+}
+
+/* Celulares estrechos (<= 360px de ancho) */
+@media (max-width: 360px) {
+  .contenido-pago {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  .transaccion-aprob-wrapper .grupo-botones {
+    gap: 8px;
+  }
+
+  .btn-regresar,
+  .btn-compartir {
+    font-size: 12.5px;
+    padding: 0 4px;
+  }
+
+  .transaccion-aprob-wrapper .qr-image {
+    width: 120px;
+    height: 120px;
+  }
 }
 
 .modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    width: 100vw;
-    height: 100vh;
-    background-color: rgba(0, 0, 0, 0.5);
-    display: flex;
-    justify-content: center;
-    align-items: flex-end;
-    z-index: 9999;
-    animation: fadeInOverlay 0.3s ease-out forwards;
-  }
-  .modal-overlay.cerrando {
-    animation: fadeOutOverlay 0.3s ease-in forwards;
-  }
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  z-index: 9999;
+  animation: fadeInOverlay 0.3s ease-out forwards;
+}
+
+.modal-overlay.cerrando {
+  animation: fadeOutOverlay 0.3s ease-in forwards;
+}
 
 .modal-overlay.abierto {
   background-color: rgba(0, 0, 0, 0.4);
@@ -203,40 +322,74 @@
 }
 
 .bottom-sheet {
-    width: 100%;
-    max-width: 420px;
-    background-color: #ffffff;
-    border-top-left-radius: 24px;
-    border-top-right-radius: 24px;
-    padding: 24px 20px 28px 20px;
-    position: relative;
-    box-shadow: 0 -10px 25px rgba(0, 0, 0, 0.2);
-    animation: slideUpModal 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  width: 100%;
+  max-width: 430px;
+  min-height: clamp(320px, 38vh, 380px);
+  background-color: #ffffff;
+  border-top-left-radius: 26px;
+  border-top-right-radius: 26px;
+  padding: 16px 22px calc(50px + env(safe-area-inset-bottom, 0px)) 22px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.18);
+  animation: slideUpModal 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.bottom-sheet::before {
+  content: "";
+  display: block;
+  width: 40px;
+  height: 4px;
+  border-radius: 9999px;
+  background-color: #e2e8f0;
+  margin: 0 auto 20px auto;
+  flex-shrink: 0;
+}
+
+.bottom-sheet.cerrando {
+  animation: slideDownModal 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes fadeInOverlay {
+  from {
+    opacity: 0;
   }
-  
-  .bottom-sheet.cerrando {
-    animation: slideDownModal 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+
+  to {
+    opacity: 1;
   }
-  
-  @keyframes fadeInOverlay {
-    from { opacity: 0; }
-    to { opacity: 1; }
+}
+
+@keyframes slideUpModal {
+  from {
+    transform: translateY(100%);
   }
-  
-  @keyframes slideUpModal {
-    from { transform: translateY(100%); }
-    to { transform: translateY(0); }
+
+  to {
+    transform: translateY(0);
   }
-  
-  @keyframes fadeOutOverlay {
-    from { opacity: 1; }
-    to { opacity: 0; }
+}
+
+@keyframes fadeOutOverlay {
+  from {
+    opacity: 1;
   }
-  
-  @keyframes slideDownModal {
-    from { transform: translateY(0); }
-    to { transform: translateY(100%); }
+
+  to {
+    opacity: 0;
   }
+}
+
+@keyframes slideDownModal {
+  from {
+    transform: translateY(0);
+  }
+
+  to {
+    transform: translateY(100%);
+  }
+}
 
 .modal-overlay.abierto .bottom-sheet {
   transform: translateY(0);
@@ -246,66 +399,85 @@
   position: absolute;
   top: 16px;
   right: 18px;
-  background: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background-color: #f3f4f6;
   border: none;
-  font-size: 16px;
+  font-size: 14px;
+  font-weight: 700;
   color: #6b7280;
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.btn-cerrar-modal:hover {
+  background-color: #e5e7eb;
+  color: #111827;
 }
 
 .modal-titulo {
-  font-size: 17px;
+  font-size: 18px;
   font-weight: 800;
   color: #111827;
-  margin-bottom: 16px;
+  margin-bottom: 20px;
   text-align: left;
 }
 
 .form-group {
   text-align: left;
-  margin-bottom: 20px;
+  margin-top: 4px;
+  margin-bottom: 28px;
 }
 
 .input-label {
   display: block;
-  font-size: 11.5px;
-  color: #6b7280;
-  margin-bottom: 6px;
-  font-weight: 500;
+  font-size: 12.5px;
+  color: #4b5563;
+  margin-bottom: 8px;
+  font-weight: 600;
 }
 
 .input-telefono {
   width: 100%;
-  height: 44px;
-  border: 1px solid #e5e7eb;
-  border-radius: 6px;
-  padding: 0 12px;
+  height: 48px;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 0 14px;
   font-size: 16px;
   color: #111827;
   outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .input-telefono:focus {
   border-color: #353ab3;
+  box-shadow: 0 0 0 3px rgba(53, 58, 179, 0.12);
 }
 
 .modal-acciones {
   display: flex;
   gap: 12px;
+  margin-top: auto;
+  padding-top: 12px;
 }
 
 .btn-modal-cancelar,
 .btn-modal-enviar {
   flex: 1;
-  height: 44px;
-  border-radius: 22px;
-  font-size: 14px;
+  height: 48px;
+  border-radius: 24px;
+  font-size: 14.5px;
   font-weight: 700;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
+  gap: 7px;
   cursor: pointer;
+  transition: opacity 0.2s, transform 0.15s ease;
 }
 
 .btn-modal-cancelar {
@@ -320,16 +492,24 @@
   color: #ffffff;
 }
 
+.btn-modal-cancelar:active,
+.btn-modal-enviar:active {
+  opacity: 0.85;
+  transform: scale(0.98);
+}
+
 @media (min-width: 640px) {
   .modal-overlay {
     align-items: center;
   }
+
   .bottom-sheet {
     border-radius: 20px;
     transform: translateY(40px);
     opacity: 0;
     transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s ease;
   }
+
   .modal-overlay.abierto .bottom-sheet {
     transform: translateY(0);
     opacity: 1;

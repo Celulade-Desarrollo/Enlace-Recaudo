@@ -1,43 +1,343 @@
+.pantalla-wrapper * {
+  box-sizing: border-box;
+  font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+.pantalla-wrapper {
+  min-height: 100vh;
+  min-height: 100dvh;
+  width: 100%;
+  background-color: #ffffff;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+}
+
+.header-pago {
+  background-color: #353ab3;
+  color: #ffffff;
+  padding: calc(16px + env(safe-area-inset-top, 0px)) 16px 18px 16px;
+  flex-shrink: 0;
+}
+
+.pantalla-wrapper .titulo-header {
+  text-align: center;
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: -0.2px;
+  color: #ffffff;
+}
+
+.zigzag-border {
+  height: 12px;
+  width: 100%;
+  background-color: #353ab3;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='12' viewBox='0 0 24 12'%3E%3Cpath d='M0 12 L12 0 L24 12 Z' fill='white'/%3E%3C/svg%3E");
+  background-repeat: repeat-x;
+  background-size: 24px 12px;
+  background-position: center bottom;
+  flex-shrink: 0;
+  margin-top: -1px;
+}
+
+.contenido-pago {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  background-color: #ffffff;
+  padding: 14px 18px calc(16px + env(safe-area-inset-bottom, 0px)) 18px;
+  min-height: 0;
+}
+
+.contenido-interno {
+  width: 100%;
+  max-width: 400px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  flex: 1;
+}
+
+.check-container {
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  border: 2.5px solid #0e9347;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 12px;
+  background-color: #ffffff;
+  flex-shrink: 0;
+}
+
+.check-container.error-icon-box {
+  border-color: #dc2626;
+  background-color: #fef2f2;
+}
+
+.subtitulo-estado {
+  font-size: 18px;
+  font-weight: 700;
+  color: #111827;
+  margin-bottom: 8px;
+}
+
+.badge-verificado {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: 9999px;
+  background-color: #ecfdf5;
+  color: #065f46;
+  font-size: 11px;
+  font-weight: 600;
+  margin-bottom: 12px;
+  border: 1px solid #a7f3d0;
+}
+
+.label-valor {
+  font-size: 13px;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.monto-valor {
+  font-size: 32px;
+  font-weight: 800;
+  color: #000000;
+  letter-spacing: -0.8px;
+  margin-bottom: 6px;
+}
+
+.nombre-empresa {
+  font-size: 13px;
+  font-weight: 700;
+  color: #111827;
+  margin-bottom: 4px;
+}
+
+.nit-empresa {
+  font-size: 11.5px;
+  font-weight: 500;
+  color: #6b7280;
+  margin-bottom: 14px;
+}
+
 .detalles-factura {
-    width: 100%;
-    margin-top: 16px;
-    margin-bottom: 24px;
+  width: 100%;
+  margin-top: 10px;
+  margin-bottom: 20px;
+  background-color: #f9fafb;
+  border-radius: 16px;
+  padding: 8px 16px;
+  border: 1px solid #f3f4f6;
+}
+
+.fila-detalle {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px dashed #e5e7eb;
+  font-size: 12.5px;
+}
+
+.fila-detalle:last-child {
+  border-bottom: none;
+}
+
+.label-detalle {
+  color: #4b5563;
+  font-weight: 600;
+  text-align: left;
+}
+
+.valor-detalle {
+  color: #111827;
+  font-weight: 600;
+  text-align: right;
+}
+
+.btn-regresar-full {
+  width: 100%;
+  height: 46px;
+  background-color: #353ab3;
+  color: #ffffff;
+  border: none;
+  border-radius: 23px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  margin-top: auto;
+  transition: opacity 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.btn-regresar-full:active {
+  opacity: 0.85;
+}
+
+.btn-descargar-recibo {
+  background: none;
+  border: 1px solid #e2e8f0;
+  color: #353ab3;
+  font-size: 13px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  cursor: pointer;
+  margin-bottom: 12px;
+  padding: 10px 18px;
+  border-radius: 20px;
+  width: 100%;
+  transition: all 0.2s ease;
+}
+
+.btn-descargar-recibo:hover {
+  background-color: #f8fafc;
+  border-color: #cbd5e1;
+}
+
+/* Spinner de carga */
+.cargando-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 16px;
+}
+
+.spinner-recaudo {
+  width: 44px;
+  height: 44px;
+  border: 4px solid #e0e7ff;
+  border-top-color: #353ab3;
+  border-radius: 50%;
+  animation: girar 0.8s linear infinite;
+  margin-bottom: 16px;
+}
+
+@keyframes girar {
+  to {
+    transform: rotate(360deg);
   }
-  
+}
+
+.cargando-titulo {
+  font-size: 15px;
+  font-weight: 700;
+  color: #1b2075;
+  margin-bottom: 6px;
+}
+
+.cargando-subtexto {
+  font-size: 12px;
+  color: #64748b;
+}
+
+/* Estado de error */
+.error-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 24px 8px;
+}
+
+.error-titulo {
+  font-size: 17px;
+  font-weight: 700;
+  color: #991b1b;
+  margin-bottom: 6px;
+}
+
+.error-desc {
+  font-size: 13px;
+  color: #4b5563;
+  line-height: 1.5;
+  margin-bottom: 24px;
+}
+
+.btn-reintentar {
+  background-color: #353ab3;
+  color: white;
+  border: none;
+  padding: 10px 24px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-bottom: 10px;
+}
+
+/* Ajustes responsivos para pantallas de poca altura */
+@media (max-height: 700px) {
+  .header-pago {
+    padding: calc(18px + env(safe-area-inset-top, 0px)) 16px 12px 16px;
+  }
+  .check-container {
+    width: 44px;
+    height: 44px;
+    margin-bottom: 6px;
+  }
+  .subtitulo-estado {
+    font-size: 16px;
+    margin-bottom: 4px;
+  }
+  .monto-valor {
+    font-size: 24px;
+    margin-bottom: 4px;
+  }
+  .detalles-factura {
+    margin-top: 6px;
+    margin-bottom: 12px;
+    padding: 6px 12px;
+  }
   .fila-detalle {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 12px 0;
-    border-bottom: 1px dashed #e5e7eb;
-    font-size: 13px;
+    padding: 7px 0;
+    font-size: 11.5px;
   }
-  
-  .label-detalle {
-    color: #111827;
-    font-weight: 700;
+  .btn-descargar-recibo {
+    margin-bottom: 8px;
+    padding: 8px 14px;
   }
-  
-  .valor-detalle {
-    color: #4b5563;
-    font-weight: 500;
-    text-align: right;
-  }
-  
   .btn-regresar-full {
-    width: 100%;
-    height: 46px;
-    background-color: #353ab3;
-    color: #ffffff;
-    border: none;
-    border-radius: 23px;
-    font-size: 14px;
-    font-weight: 700;
-    cursor: pointer;
-    margin-top: auto;
-    transition: opacity 0.2s;
+    height: 40px;
   }
-  
-  .btn-regresar-full:active {
-    opacity: 0.85;
+}
+
+/* Ajustes para pantallas estrechas (<= 360px) */
+@media (max-width: 360px) {
+  .contenido-pago {
+    padding-left: 12px;
+    padding-right: 12px;
   }
+  .monto-valor {
+    font-size: 24px;
+  }
+  .detalles-factura {
+    padding: 6px 10px;
+  }
+  .fila-detalle {
+    font-size: 11px;
+  }
+}
+
+@media print {
+  body {
+    background: white;
+  }
+  .btn-regresar-full,
+  .btn-descargar-recibo {
+    display: none !important;
+  }
+}
