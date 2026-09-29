@@ -26,7 +26,7 @@ export const BottomNavigation: React.FC<BottomNavigationProps> = ({
           onClick={() => onTabChange('inicio')}
         />
         <BottomNavItem
-          label="Movimientos"
+          label="Mis Movimientos"
           iconName="coins"
           isActive={activeTab === 'movimientos'}
           onClick={() => onTabChange('movimientos')}
