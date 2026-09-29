@@ -135,6 +135,56 @@ const INITIAL_TIENDAS: TiendaRuta[] = [
     recaudado: '$520.000',
     horaVisita: '07:50',
     facturasCount: 2
+  },
+  {
+    id: 'cigarreria-central',
+    nombre: 'Cigarrería Central',
+    estado: 'visitado',
+    saldoTotal: '$240.000',
+    saldoTotalNum: 240000,
+    recaudado: '$240.000',
+    horaVisita: '07:30',
+    facturasCount: 1
+  },
+  {
+    id: 'panaderia-esperanza',
+    nombre: 'Panadería La Esperanza',
+    estado: 'visitado',
+    saldoTotal: '$380.000',
+    saldoTotalNum: 380000,
+    recaudado: '$380.000',
+    horaVisita: '07:15',
+    facturasCount: 2
+  },
+  {
+    id: 'minimarket-sol',
+    nombre: 'Minimarket El Sol',
+    estado: 'visitado',
+    saldoTotal: '$190.500',
+    saldoTotalNum: 190500,
+    recaudado: '$190.500',
+    horaVisita: '07:00',
+    facturasCount: 1
+  },
+  {
+    id: 'frutas-verduras',
+    nombre: 'Frutas y Verduras JJ',
+    estado: 'visitado',
+    saldoTotal: '$415.000',
+    saldoTotalNum: 415000,
+    recaudado: '$415.000',
+    horaVisita: '06:45',
+    facturasCount: 3
+  },
+  {
+    id: 'granero-paisa',
+    nombre: 'Granero El Paisa',
+    estado: 'visitado',
+    saldoTotal: '$530.000',
+    saldoTotalNum: 530000,
+    recaudado: '$530.000',
+    horaVisita: '06:30',
+    facturasCount: 2
   }
 ];
 

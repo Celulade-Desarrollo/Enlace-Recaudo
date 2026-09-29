@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion } from 'motion/react';
 import { Icon } from '../../atoms/Icon/Icon';
+import { MobileHomeBar } from '../../atoms/MobileHomeBar/MobileHomeBar';
 
 export type TransportistaTab = 'inicio' | 'movimientos' | 'notificaciones';
 
@@ -17,7 +18,7 @@ export const TransportistaBottomNav: React.FC<TransportistaBottomNavProps> = ({
 }) => {
   return (
     <nav
-      className={`fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[430px] bg-white/95 backdrop-blur-md border-t border-slate-100 shadow-[0_-4px_20px_rgba(0,0,0,0.05)] z-30 select-none pb-[max(0.75rem,env(safe-area-inset-bottom))] ${className}`}
+      className={`fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[430px] bg-white/95 backdrop-blur-md border-t border-slate-100 shadow-[0_-4px_20px_rgba(0,0,0,0.05)] z-30 select-none ${className}`}
     >
       <div className="flex items-center justify-around pt-2 px-4 sm:px-6">
         {/* Inicio */}
@@ -31,14 +32,14 @@ export const TransportistaBottomNav: React.FC<TransportistaBottomNavProps> = ({
         >
           <div
             className={`transition-colors duration-200 ${
-              activeTab === 'inicio' ? 'text-[#363CB1]' : 'text-slate-600 group-hover:text-[#1B2075]'
+              activeTab === 'inicio' ? 'text-[#2F3CB3]' : 'text-slate-600 group-hover:text-[#1B2075]'
             }`}
           >
             <Icon name="home" size={24} stroke={activeTab === 'inicio' ? 2.3 : 1.8} />
           </div>
           <span
             className={`text-[11px] font-medium tracking-tight mt-1 transition-colors duration-200 ${
-              activeTab === 'inicio' ? 'text-[#363CB1] font-semibold' : 'text-slate-600'
+              activeTab === 'inicio' ? 'text-[#2F3CB3] font-semibold' : 'text-slate-600'
             }`}
           >
             Inicio
@@ -56,12 +57,12 @@ export const TransportistaBottomNav: React.FC<TransportistaBottomNavProps> = ({
         >
           <div
             className={`transition-colors duration-200 ${
-              activeTab === 'movimientos' ? 'text-[#363CB1]' : 'text-slate-600 group-hover:text-[#1B2075]'
+              activeTab === 'movimientos' ? 'text-[#2F3CB3]' : 'text-slate-600 group-hover:text-[#1B2075]'
             }`}
           >
             <div
               className={`w-6 h-6 rounded-full border-2 flex items-center justify-center font-bold text-xs leading-none ${
-                activeTab === 'movimientos' ? 'border-[#363CB1] text-[#363CB1]' : 'border-slate-600 text-slate-600'
+                activeTab === 'movimientos' ? 'border-[#2F3CB3] text-[#2F3CB3]' : 'border-slate-600 text-slate-600'
               }`}
             >
               $
@@ -69,7 +70,7 @@ export const TransportistaBottomNav: React.FC<TransportistaBottomNavProps> = ({
           </div>
           <span
             className={`text-[11px] font-medium tracking-tight mt-1 transition-colors duration-200 ${
-              activeTab === 'movimientos' ? 'text-[#363CB1] font-semibold' : 'text-slate-600'
+              activeTab === 'movimientos' ? 'text-[#2F3CB3] font-semibold' : 'text-slate-600'
             }`}
           >
             Movimientos
@@ -87,20 +88,23 @@ export const TransportistaBottomNav: React.FC<TransportistaBottomNavProps> = ({
         >
           <div
             className={`transition-colors duration-200 ${
-              activeTab === 'notificaciones' ? 'text-[#363CB1]' : 'text-slate-600 group-hover:text-[#1B2075]'
+              activeTab === 'notificaciones' ? 'text-[#2F3CB3]' : 'text-slate-600 group-hover:text-[#1B2075]'
             }`}
           >
             <Icon name="bell" size={24} stroke={activeTab === 'notificaciones' ? 2.3 : 1.8} />
           </div>
           <span
             className={`text-[11px] font-medium tracking-tight mt-1 transition-colors duration-200 ${
-              activeTab === 'notificaciones' ? 'text-[#363CB1] font-semibold' : 'text-slate-600'
+              activeTab === 'notificaciones' ? 'text-[#2F3CB3] font-semibold' : 'text-slate-600'
             }`}
           >
             Notificaciones
           </span>
         </motion.button>
       </div>
+
+      {/* Indicador de barra de inicio nativo móvil */}
+      <MobileHomeBar theme="dark" />
     </nav>
   );
 };
