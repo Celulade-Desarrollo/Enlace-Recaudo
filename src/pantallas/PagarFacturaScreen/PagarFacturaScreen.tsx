@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'motion/react';
 import { PaymentTopHeader } from '../../components/organisms/PaymentTopHeader/PaymentTopHeader';
 import { InvoiceDetailCard, type InvoiceDetail } from '../../components/molecules/InvoiceDetailCard/InvoiceDetailCard';
 import { PaymentMethodCard } from '../../components/molecules/PaymentMethodCard/PaymentMethodCard';
 import { ModalInscribirLlave } from '../../components/molecules/ModalInscribirLlave/ModalInscribirLlave';
 import { bancosService, type MedioDePago } from '../../services/bancosService';
+import { facturasService } from '../../services/facturasService';
 import { Icon } from '../../components/atoms/Icon/Icon';
 import type { InvoiceItemData } from '../../components/molecules/InvoiceCard/InvoiceCard';
-import { useNavigate } from 'react-router-dom';
-import type { DatosTransaccion } from '../../types/transaccion';
+import { type DatosTransaccion, obtenerFechaHoraActual } from '../../types/transaccion';
 
 interface PagarFacturaScreenProps {
   providerInvoice: InvoiceItemData;
@@ -92,25 +94,53 @@ export const PagarFacturaScreen: React.FC<PagarFacturaScreenProps> = ({
         ? selectedInvoice.amount
         : `$${Number(customAmount || 0).toLocaleString('es-CO')}`;
 
-    const now = new Date();
-    const meses = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
-    const dia = now.getDate();
-    const mes = meses[now.getMonth()];
-    const anio = now.getFullYear();
-    const horas = String(now.getHours()).padStart(2, '0');
-    const minutos = String(now.getMinutes()).padStart(2, '0');
-    const fechaHora = `${dia} ${mes} ${anio} ${horas}:${minutos}`;
+    const fechaHora = obtenerFechaHoraActual();
+
+    const nitEmpresa = providerInvoice.providerName.includes('Alpina')
+      ? 'NIT 860.025.900-1'
+      : providerInvoice.providerName.includes('Nutresa')
+      ? 'NIT 890.900.050-1'
+      : 'NIT 890.903.939-5';
+
+    // Cálculo de subtotal e IVA estimados a partir del valor final
+    const numValor = parseInt(valorFinal.replace(/\D/g, ''), 10) || 0;
+    const numSubtotal = Math.round(numValor / 1.19);
+    const numIva = numValor - numSubtotal;
+    const subtotal = `$${numSubtotal.toLocaleString('es-CO')}`;
+    const iva = `$${numIva.toLocaleString('es-CO')}`;
+    const referenciaPago = `REF-${selectedInvoice.invoiceNumber}`;
 
     const datosTransaccion: DatosTransaccion = {
       idFactura: selectedInvoice.invoiceNumber,
       valor: valorFinal,
+      subtotal,
+      iva,
       empresa: providerInvoice.providerName.includes('Alpina')
         ? 'Alpina Productos Alimenticios S.A.'
         : providerInvoice.providerName,
+      nitEmpresa,
       pagador: 'Miscelanea Rin-Rin',
+      nitPagador: 'CC 1.020.345.678',
       medioPago: metodoSeleccionado?.nombre || 'Llave Bre-B',
-      fechaHora: fechaHora
+      fechaHora: fechaHora,
+      referenciaPago
     };
+
+    // Guardar en la persistencia local de la simulación backend
+    facturasService.guardarFacturaLocal({
+      idFactura: datosTransaccion.idFactura,
+      valor: datosTransaccion.valor,
+      subtotal: datosTransaccion.subtotal,
+      iva: datosTransaccion.iva,
+      empresa: datosTransaccion.empresa,
+      pagador: datosTransaccion.pagador,
+      medioPago: datosTransaccion.medioPago,
+      fechaHora: datosTransaccion.fechaHora,
+      estado: 'APROBADA',
+      referenciaPago: datosTransaccion.referenciaPago || `REF-${selectedInvoice.invoiceNumber}`,
+      nitEmpresa: datosTransaccion.nitEmpresa,
+      nitPagador: datosTransaccion.nitPagador
+    });
 
     navigate('/transaccion', { state: { datos: datosTransaccion } });
   };
@@ -139,62 +169,77 @@ export const PagarFacturaScreen: React.FC<PagarFacturaScreenProps> = ({
         {/* ========================================================
             PASO 1: Seleccionar qué factura pagar (Image 1)
         ======================================================== */}
-        {step === 1 && (
-          <div className="flex-1 flex flex-col px-5 pt-7 pb-6">
-            {/* Saldo total del proveedor */}
-            <div className="flex flex-col items-center text-center">
-              <span className="text-sm sm:text-base font-medium text-slate-700">
-                Saldo total
-              </span>
-              <h1 className="text-[34px] sm:text-[38px] font-black text-slate-900 tracking-tight leading-none mt-1 mb-5">
-                {formattedProviderTotal}
-              </h1>
+        <AnimatePresence mode="wait">
+          {step === 1 && (
+            <motion.div
+              key="step-1"
+              initial={{ opacity: 0, x: -16 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -16 }}
+              transition={{ duration: 0.2, ease: 'easeOut' }}
+              className="flex-1 flex flex-col px-5 pt-7 pb-6"
+            >
+              {/* Saldo total del proveedor */}
+              <div className="flex flex-col items-center text-center">
+                <span className="text-sm sm:text-base font-medium text-slate-700">
+                  Saldo total
+                </span>
+                <h1 className="text-[34px] sm:text-[38px] font-black text-slate-900 tracking-tight leading-none mt-1 mb-5">
+                  {formattedProviderTotal}
+                </h1>
 
-              {/* Nombre y logo del proveedor */}
-              <div className="flex items-center gap-3">
-                <div
-                  className={`w-11 h-11 rounded-full overflow-hidden flex items-center justify-center shrink-0 border border-slate-100 shadow-2xs ${
-                    providerInvoice.logoBg || 'bg-white'
-                  }`}
-                >
-                  <img
-                    src={providerInvoice.providerLogo}
-                    alt={providerInvoice.providerName}
-                    className="w-full h-full object-contain p-1"
-                  />
+                {/* Nombre y logo del proveedor */}
+                <div className="flex items-center gap-3">
+                  <div
+                    className={`w-11 h-11 rounded-full overflow-hidden flex items-center justify-center shrink-0 border border-slate-100 shadow-2xs ${
+                      providerInvoice.logoBg || 'bg-white'
+                    }`}
+                  >
+                    <img
+                      src={providerInvoice.providerLogo}
+                      alt={providerInvoice.providerName}
+                      className="w-full h-full object-contain p-1"
+                    />
+                  </div>
+                  <h3 className="font-bold text-slate-900 text-sm sm:text-base tracking-tight text-left">
+                    {providerInvoice.providerName.includes('Alpina')
+                      ? 'Alpina Productos Alimenticios S.A.'
+                      : providerInvoice.providerName}
+                  </h3>
                 </div>
-                <h3 className="font-bold text-slate-900 text-sm sm:text-base tracking-tight text-left">
-                  {providerInvoice.providerName.includes('Alpina')
-                    ? 'Alpina Productos Alimenticios S.A.'
-                    : providerInvoice.providerName}
-                </h3>
               </div>
-            </div>
 
-            {/* Listado de Facturas Disponibles */}
-            <div className="mt-8 flex flex-col gap-3">
-              <h2 className="text-base sm:text-[17px] font-bold text-[#1B2075] tracking-tight">
-                Facturas disponibles para pago ({availableInvoices.length})
-              </h2>
+              {/* Listado de Facturas Disponibles */}
+              <div className="mt-8 flex flex-col gap-3">
+                <h2 className="text-base sm:text-[17px] font-bold text-[#1B2075] tracking-tight">
+                  Facturas disponibles para pago ({availableInvoices.length})
+                </h2>
 
-              <div className="flex flex-col gap-3">
-                {availableInvoices.map((inv) => (
-                  <InvoiceDetailCard
-                    key={inv.id}
-                    invoice={inv}
-                    onClick={handleSelectInvoice}
-                  />
-                ))}
+                <div className="flex flex-col gap-3">
+                  {availableInvoices.map((inv) => (
+                    <InvoiceDetailCard
+                      key={inv.id}
+                      invoice={inv}
+                      onClick={handleSelectInvoice}
+                    />
+                  ))}
+                </div>
               </div>
-            </div>
-          </div>
-        )}
+            </motion.div>
+          )}
 
         {/* ========================================================
             PASO 2: Valor a pagar y selección de medio de pago (Images 2 & 3)
         ======================================================== */}
         {step === 2 && selectedInvoice && (
-          <div className="flex-1 flex flex-col px-5 pt-6 pb-4">
+          <motion.div
+            key="step-2"
+            initial={{ opacity: 0, x: 16 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: 16 }}
+            transition={{ duration: 0.2, ease: 'easeOut' }}
+            className="flex-1 flex flex-col px-5 pt-6 pb-4"
+          >
             {/* Saldo total de la factura seleccionada */}
             <div className="flex flex-col items-center text-center mb-6">
               <span className="text-sm sm:text-base font-medium text-slate-700">
@@ -326,26 +371,29 @@ export const PagarFacturaScreen: React.FC<PagarFacturaScreenProps> = ({
             {/* Botones inferiores: Cancelar y Pagar Factura */}
             <div className="flex items-center gap-3 pt-2 mt-auto">
               {/* Botón Cancelar */}
-              <button
+              <motion.button
                 type="button"
+                whileTap={{ scale: 0.97 }}
                 onClick={() => setStep(1)}
-                className="w-1/2 py-3.5 rounded-full border-2 border-[#2F399B] text-[#2F399B] font-bold text-sm bg-white hover:bg-slate-50 active:scale-98 transition-all cursor-pointer text-center"
+                className="w-1/2 py-3.5 rounded-full border-2 border-[#2F399B] text-[#2F399B] font-bold text-sm bg-white hover:bg-slate-50 transition-colors cursor-pointer text-center"
               >
                 Cancelar
-              </button>
+              </motion.button>
 
               {/* Botón Pagar Factura */}
-              <button
+              <motion.button
                 type="button"
+                whileTap={{ scale: 0.97 }}
                 onClick={handlePagarFactura}
                 disabled={!selectedMethodId || (paymentType === 'otro' && !customAmount)}
-                className="w-1/2 py-3.5 rounded-full bg-[#2F399B] text-white font-bold text-sm hover:bg-[#252e80] active:scale-98 shadow-sm transition-all cursor-pointer text-center disabled:opacity-40 disabled:pointer-events-none"
+                className="w-1/2 py-3.5 rounded-full bg-[#2F399B] text-white font-bold text-sm hover:bg-[#252e80] shadow-sm transition-colors cursor-pointer text-center disabled:opacity-40 disabled:pointer-events-none"
               >
                 Pagar Factura
-              </button>
+              </motion.button>
             </div>
-          </div>
+          </motion.div>
         )}
+        </AnimatePresence>
 
         {/* Modal para inscribir nuevas llaves usando la SEMIAPI */}
         <ModalInscribirLlave

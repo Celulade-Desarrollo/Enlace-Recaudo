@@ -1,4 +1,5 @@
 import React from 'react';
+import { motion } from 'motion/react';
 
 export interface InvoiceItemData {
   id: string;
@@ -21,9 +22,12 @@ export const InvoiceCard: React.FC<InvoiceCardProps> = ({
   className = ''
 }) => {
   return (
-    <div
+    <motion.div
+      whileTap={{ scale: 0.98 }}
+      whileHover={{ y: -1 }}
+      transition={{ duration: 0.15 }}
       onClick={() => onClick?.(data)}
-      className={`bg-white rounded-2xl p-4 flex items-center justify-between border border-slate-100 shadow-[0_2px_8px_rgba(0,0,0,0.04)] hover:shadow-md hover:border-slate-200 transition-all duration-200 cursor-pointer active:scale-[0.99] select-none ${className}`}
+      className={`bg-white rounded-2xl p-4 flex items-center justify-between border border-slate-100 shadow-[0_2px_8px_rgba(0,0,0,0.04)] hover:shadow-md hover:border-slate-200 transition-all cursor-pointer select-none ${className}`}
     >
       {/* Lado izquierdo: Logo del proveedor y datos principales */}
       <div className="flex items-center gap-3.5 min-w-0 pr-2">
@@ -59,6 +63,6 @@ export const InvoiceCard: React.FC<InvoiceCardProps> = ({
           {data.totalBalance}
         </span>
       </div>
-    </div>
+    </motion.div>
   );
 };

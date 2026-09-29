@@ -12,6 +12,7 @@
   "dependencies": {
     "@tabler/icons-react": "^3.48.0",
     "@tailwindcss/vite": "^4.3.3",
+    "motion": "^13.4.6",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
     "react-router-dom": "^7.18.4",

@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { motion, type Variants } from 'motion/react';
 import { Typography } from '../../atoms/Typography/Typography';
 import { SearchBar } from '../../molecules/SearchBar/SearchBar';
 import { InvoiceCard, type InvoiceItemData } from '../../molecules/InvoiceCard/InvoiceCard';
@@ -29,6 +30,25 @@ const INITIAL_INVOICES: InvoiceItemData[] = [
     logoBg: 'bg-white',
   }
 ];
+
+const listVariants: Variants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.05
+    }
+  }
+};
+
+const itemVariants: Variants = {
+  hidden: { opacity: 0, y: 10 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.2, ease: 'easeOut' }
+  }
+};
 
 interface PendingInvoicesSectionProps {
   invoices?: InvoiceItemData[];
@@ -65,15 +85,21 @@ export const PendingInvoicesSection: React.FC<PendingInvoicesSectionProps> = ({
         placeholder="Buscar proveedor"
       />
 
-      {/* Lista de tarjetas de facturas pendientes */}
-      <div className="flex flex-col gap-3 mt-1">
+      {/* Lista animada de tarjetas de facturas pendientes */}
+      <motion.div
+        variants={listVariants}
+        initial="hidden"
+        animate="visible"
+        className="flex flex-col gap-3 mt-1"
+      >
         {filteredInvoices.length > 0 ? (
           filteredInvoices.map((invoice) => (
-            <InvoiceCard
-              key={invoice.id}
-              data={invoice}
-              onClick={onInvoiceClick}
-            />
+            <motion.div key={invoice.id} variants={itemVariants}>
+              <InvoiceCard
+                data={invoice}
+                onClick={onInvoiceClick}
+              />
+            </motion.div>
           ))
         ) : (
           <div className="text-center py-8 bg-white rounded-2xl border border-dashed border-slate-200">
@@ -82,7 +108,7 @@ export const PendingInvoicesSection: React.FC<PendingInvoicesSectionProps> = ({
             </p>
           </div>
         )}
-      </div>
+      </motion.div>
     </section>
   );
 };

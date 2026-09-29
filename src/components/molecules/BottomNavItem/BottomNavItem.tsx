@@ -1,4 +1,5 @@
 import React from 'react';
+import { motion } from 'motion/react';
 import { Icon, type IconName } from '../../atoms/Icon/Icon';
 
 interface BottomNavItemProps {
@@ -17,10 +18,12 @@ export const BottomNavItem: React.FC<BottomNavItemProps> = ({
   className = ''
 }) => {
   return (
-    <button
+    <motion.button
       type="button"
       onClick={onClick}
-      className={`flex flex-col items-center justify-center py-1.5 px-3 transition-colors duration-200 select-none cursor-pointer group ${className}`}
+      whileTap={{ scale: 0.92 }}
+      transition={{ duration: 0.12 }}
+      className={`flex flex-col items-center justify-center py-1.5 px-3 transition-colors select-none cursor-pointer group ${className}`}
       aria-label={label}
     >
       <div
@@ -48,6 +51,6 @@ export const BottomNavItem: React.FC<BottomNavItemProps> = ({
       >
         {label}
       </span>
-    </button>
+    </motion.button>
   );
 };
