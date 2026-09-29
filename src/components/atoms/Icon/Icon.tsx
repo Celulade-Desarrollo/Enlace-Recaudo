@@ -14,6 +14,12 @@ import {
   IconPlus,
   IconX,
   IconBuildingBank,
+  IconBuildingStore,
+  IconClock,
+  IconCircleCheck,
+  IconBell,
+  IconQrcode,
+  IconInfoCircle,
   type TablerIcon
 } from '@tabler/icons-react';
 
@@ -31,7 +37,13 @@ export type IconName =
   | 'check'
   | 'plus'
   | 'x'
-  | 'building-bank';
+  | 'building-bank'
+  | 'building-store'
+  | 'clock'
+  | 'circle-check'
+  | 'bell'
+  | 'qrcode'
+  | 'info-circle';
 
 const iconMap: Record<IconName, TablerIcon> = {
   home: IconHome,
@@ -48,6 +60,12 @@ const iconMap: Record<IconName, TablerIcon> = {
   plus: IconPlus,
   x: IconX,
   'building-bank': IconBuildingBank,
+  'building-store': IconBuildingStore,
+  clock: IconClock,
+  'circle-check': IconCircleCheck,
+  bell: IconBell,
+  qrcode: IconQrcode,
+  'info-circle': IconInfoCircle,
 };
 
 interface IconProps {
