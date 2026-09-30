@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { HeaderBanner } from '../../components/organisms/HeaderBanner/HeaderBanner';
 import { QuickActionsRow } from '../../components/organisms/QuickActionsRow/QuickActionsRow';
@@ -13,12 +14,13 @@ interface InicioScreenProps {
 }
 
 export const InicioScreen: React.FC<InicioScreenProps> = ({ initialTab = 'inicio' }) => {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<TabType>(initialTab);
   const [userName] = useState('Laura Martínez');
   const [selectedInvoice, setSelectedInvoice] = useState<InvoiceItemData | null>(null);
 
   const handleMisLlaves = () => {
-    console.log('Mis Llaves click');
+    navigate('/mis-llaves');
   };
 
   const handleInvoiceClick = (invoice: InvoiceItemData) => {

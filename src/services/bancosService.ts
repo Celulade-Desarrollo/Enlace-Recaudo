@@ -6,6 +6,8 @@ export interface Banco {
   tipo?: 'banco' | 'billetera';
 }
 
+export type TipoLlave = 'celular' | 'documento' | 'correo' | 'codigo';
+
 export interface MedioDePago {
   id: string;
   bancoId: string;
@@ -14,6 +16,9 @@ export interface MedioDePago {
   tipo: 'llave' | 'bolsillo';
   valorLlave?: string;
   saldoDisponible?: string;
+  tipoLlave?: TipoLlave;
+  fechaInscripcion?: string;
+  esPrincipal?: boolean;
 }
 
 const BANCOS_FALLBACK: Banco[] = [
@@ -68,7 +73,10 @@ const INITIAL_MEDIOS_DE_PAGO: MedioDePago[] = [
     nombre: 'Nequi',
     icono: '/nequi_icon.png',
     tipo: 'llave',
-    valorLlave: '311 387 7395'
+    valorLlave: '311 387 7395',
+    tipoLlave: 'celular',
+    fechaInscripcion: '12 Ene 2025',
+    esPrincipal: true
   },
   {
     id: 'bogota-2',
@@ -76,7 +84,10 @@ const INITIAL_MEDIOS_DE_PAGO: MedioDePago[] = [
     nombre: 'Banco de Bogotá',
     icono: '/bancobogota_icon.png',
     tipo: 'llave',
-    valorLlave: '10073598'
+    valorLlave: '10073598',
+    tipoLlave: 'documento',
+    fechaInscripcion: '04 Feb 2025',
+    esPrincipal: false
   },
   {
     id: 'bolsillo-3',
@@ -96,6 +107,20 @@ const ICON_MAP: Record<string, string> = {
   davivienda: '/davivienda_icon.png',
   bbva: '/bbva_icon.png',
   nu: '/nubank_icon.png',
+};
+
+// Deducir el tipo de llave según el valor ingresado
+export const inferirTipoLlave = (valor: string): TipoLlave => {
+  const clean = valor.trim();
+  if (clean.includes('@')) return 'correo';
+  const digits = clean.replace(/\D/g, '');
+  if (digits.length === 10 && (digits.startsWith('3') || digits.startsWith('573'))) {
+    return 'celular';
+  }
+  if (/^\d{6,11}$/.test(digits)) {
+    return 'documento';
+  }
+  return 'codigo';
 };
 
 /**
@@ -127,18 +152,30 @@ export const bancosService = {
     if (stored) {
       try {
         const parsed: MedioDePago[] = JSON.parse(stored);
-        // Actualizar iconos de llaves existentes con los nuevos logos de public/
+        // Actualizar iconos de llaves existentes con los nuevos logos de public/ y asegurar campos
         return parsed.map((m) => {
+          let updated = { ...m };
           if (m.tipo === 'llave' && ICON_MAP[m.bancoId]) {
-            return { ...m, icono: ICON_MAP[m.bancoId] };
+            updated.icono = ICON_MAP[m.bancoId];
           }
-          return m;
+          if (m.tipo === 'llave' && !updated.tipoLlave && m.valorLlave) {
+            updated.tipoLlave = inferirTipoLlave(m.valorLlave);
+          }
+          return updated;
         });
       } catch (e) {
         console.error('Error parseando medios de pago guardados', e);
       }
     }
     return INITIAL_MEDIOS_DE_PAGO;
+  },
+
+  /**
+   * Obtiene exclusivamente las llaves inscritas en el programa Bre-B
+   */
+  async getLlaves(): Promise<MedioDePago[]> {
+    const todos = await this.getMediosDePago();
+    return todos.filter((m) => m.tipo === 'llave');
   },
 
   /**
@@ -149,20 +186,109 @@ export const bancosService = {
   },
 
   /**
-   * Inscribe una nueva llave
+   * Inscribe una nueva llave en el programa
    */
-  async inscribirLlave(banco: Banco, valorLlave: string): Promise<MedioDePago> {
+  async inscribirLlave(
+    banco: Banco,
+    valorLlave: string,
+    tipoLlave?: TipoLlave
+  ): Promise<MedioDePago> {
     const current = await this.getMediosDePago();
+    const existingKeys = current.filter((m) => m.tipo === 'llave');
+    const tipo = tipoLlave || inferirTipoLlave(valorLlave);
+
+    const meses = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+    const now = new Date();
+    const fechaInscripcion = `${now.getDate().toString().padStart(2, '0')} ${meses[now.getMonth()]} ${now.getFullYear()}`;
+
     const nueva: MedioDePago = {
       id: `${banco.id}-${Date.now()}`,
       bancoId: banco.id,
       nombre: banco.nombre,
       icono: banco.icono,
       tipo: 'llave',
-      valorLlave
+      valorLlave,
+      tipoLlave: tipo,
+      fechaInscripcion,
+      esPrincipal: existingKeys.length === 0 // Primera llave es la principal por defecto
     };
+
     const updated = [nueva, ...current];
     await this.saveMediosDePago(updated);
     return nueva;
+  },
+
+  /**
+   * Elimina / desvincula una llave del programa
+   */
+  async eliminarLlave(id: string): Promise<MedioDePago[]> {
+    const current = await this.getMediosDePago();
+    const eliminada = current.find((m) => m.id === id);
+    let updated = current.filter((m) => m.id !== id);
+
+    // Si la llave eliminada era principal y quedan llaves, asignar la principal a la primera restante
+    if (eliminada?.esPrincipal) {
+      const primeraRestante = updated.find((m) => m.tipo === 'llave');
+      if (primeraRestante) {
+        primeraRestante.esPrincipal = true;
+      }
+    }
+
+    await this.saveMediosDePago(updated);
+    return updated.filter((m) => m.tipo === 'llave');
+  },
+
+  /**
+   * Establece una llave como la principal para recepción de pagos
+   */
+  async setLlavePrincipal(id: string): Promise<MedioDePago[]> {
+    const current = await this.getMediosDePago();
+    const updated = current.map((m) => {
+      if (m.tipo === 'llave') {
+        return {
+          ...m,
+          esPrincipal: m.id === id
+        };
+      }
+      return m;
+    });
+
+    await this.saveMediosDePago(updated);
+    return updated.filter((m) => m.tipo === 'llave');
+  },
+
+  /**
+   * Actualiza los datos de una llave existente (editar número, tipo o banco)
+   */
+  async editarLlave(
+    id: string,
+    nuevosDatos: {
+      valorLlave: string;
+      tipoLlave?: TipoLlave;
+      banco?: Banco;
+    }
+  ): Promise<MedioDePago[]> {
+    const current = await this.getMediosDePago();
+    const updated = current.map((m) => {
+      if (m.id === id) {
+        const tipo = nuevosDatos.tipoLlave || inferirTipoLlave(nuevosDatos.valorLlave);
+        return {
+          ...m,
+          valorLlave: nuevosDatos.valorLlave,
+          tipoLlave: tipo,
+          ...(nuevosDatos.banco
+            ? {
+                bancoId: nuevosDatos.banco.id,
+                nombre: nuevosDatos.banco.nombre,
+                icono: nuevosDatos.banco.icono
+              }
+            : {})
+        };
+      }
+      return m;
+    });
+
+    await this.saveMediosDePago(updated);
+    return updated.filter((m) => m.tipo === 'llave');
   }
 };

@@ -14,6 +14,16 @@ import {
   IconPlus,
   IconX,
   IconBuildingBank,
+  IconTrash,
+  IconCopy,
+  IconPhone,
+  IconId,
+  IconMail,
+  IconShieldCheck,
+  IconInfoCircle,
+  IconDotsVertical,
+  IconAlertCircle,
+  IconPencil,
   type TablerIcon
 } from '@tabler/icons-react';
 
@@ -31,7 +41,18 @@ export type IconName =
   | 'check'
   | 'plus'
   | 'x'
-  | 'building-bank';
+  | 'building-bank'
+  | 'trash'
+  | 'copy'
+  | 'phone'
+  | 'id'
+  | 'mail'
+  | 'shield-check'
+  | 'info-circle'
+  | 'dots-vertical'
+  | 'alert-circle'
+  | 'pencil'
+  | 'edit';
 
 const iconMap: Record<IconName, TablerIcon> = {
   home: IconHome,
@@ -48,6 +69,17 @@ const iconMap: Record<IconName, TablerIcon> = {
   plus: IconPlus,
   x: IconX,
   'building-bank': IconBuildingBank,
+  trash: IconTrash,
+  copy: IconCopy,
+  phone: IconPhone,
+  id: IconId,
+  mail: IconMail,
+  'shield-check': IconShieldCheck,
+  'info-circle': IconInfoCircle,
+  'dots-vertical': IconDotsVertical,
+  'alert-circle': IconAlertCircle,
+  pencil: IconPencil,
+  edit: IconPencil,
 };
 
 interface IconProps {
