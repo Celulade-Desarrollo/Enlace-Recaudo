@@ -114,6 +114,44 @@
   margin-bottom: 12px;
 }
 
+/* Detalles de la factura pagada */
+.transaccion-aprob-wrapper .detalles-factura {
+  width: 100%;
+  margin-top: 6px;
+  margin-bottom: 14px;
+  background-color: #f9fafb;
+  border-radius: 16px;
+  padding: 6px 14px;
+  border: 1px solid #f1f3f7;
+  text-align: left;
+  box-sizing: border-box;
+}
+
+.transaccion-aprob-wrapper .fila-detalle {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px dashed #e5e7eb;
+  font-size: 12px;
+}
+
+.transaccion-aprob-wrapper .fila-detalle:last-child {
+  border-bottom: none;
+}
+
+.transaccion-aprob-wrapper .label-detalle {
+  color: #6b7280;
+  font-weight: 500;
+  text-align: left;
+}
+
+.transaccion-aprob-wrapper .valor-detalle {
+  color: #111827;
+  font-weight: 600;
+  text-align: right;
+}
+
 /* Contenedor e imagen QR optimizados para escaneo desde otro móvil */
 .transaccion-aprob-wrapper .qr-container {
   padding: 10px;

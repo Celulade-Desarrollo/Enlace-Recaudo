@@ -48,33 +48,27 @@ export default function TransaccionAprob({ datos: propsDatos, onRegresar }: Prop
     (location.state as { datos?: DatosTransaccion })?.datos ||
     (ultimaFactura
       ? {
-          idFactura: ultimaFactura.idFactura,
-          valor: ultimaFactura.valor,
-          subtotal: ultimaFactura.subtotal,
-          iva: ultimaFactura.iva,
-          empresa: ultimaFactura.empresa,
-          nitEmpresa: ultimaFactura.nitEmpresa,
-          pagador: ultimaFactura.pagador,
-          nitPagador: ultimaFactura.nitPagador,
-          medioPago: ultimaFactura.medioPago,
-          fechaHora: ultimaFactura.fechaHora,
-          referenciaPago: ultimaFactura.referenciaPago
-        }
+        idFactura: ultimaFactura.idFactura,
+        valor: ultimaFactura.valor,
+        subtotal: ultimaFactura.subtotal,
+        iva: ultimaFactura.iva,
+        empresa: ultimaFactura.empresa,
+        nitEmpresa: ultimaFactura.nitEmpresa,
+        pagador: ultimaFactura.pagador,
+        nitPagador: ultimaFactura.nitPagador,
+        medioPago: ultimaFactura.medioPago,
+        fechaHora: ultimaFactura.fechaHora,
+        referenciaPago: ultimaFactura.referenciaPago
+      }
       : getDefaultDatosTransaccion());
 
-  // Asegurar que fechaHora sea siempre en Hora Colombia (America/Bogota)
+  // Asegurar que fechaHora sea siempre en Hora Colombia (America/Bogota) si no viene definida
   const partesColActual = obtenerPartesColombia(new Date());
   const fechaHoraActualCol = `${partesColActual.dia} ${partesColActual.mesTexto} ${partesColActual.anio} ${partesColActual.hora12}:${partesColActual.minuto}${partesColActual.ampm}`;
 
   const datos: DatosTransaccion = {
     ...rawDatos,
-    fechaHora:
-      !rawDatos.fechaHora ||
-      rawDatos.fechaHora.includes("13 Ago 2026") ||
-      rawDatos.fechaHora.includes("13/8/2026") ||
-      rawDatos.fechaHora.includes("Ago 2026")
-        ? fechaHoraActualCol
-        : rawDatos.fechaHora
+    fechaHora: rawDatos.fechaHora?.trim() ? rawDatos.fechaHora : fechaHoraActualCol
   };
 
   // URL base dinámica: Si está desplegado, usa el origen actual del navegador (window.location.origin),
@@ -207,12 +201,87 @@ export default function TransaccionAprob({ datos: propsDatos, onRegresar }: Prop
               >
                 <h2 className="subtitulo-estado">Transacción Aprobada</h2>
 
-                <span className="label-valor">Valor</span>
+                <span className="label-valor">Valor Pagado</span>
                 <div className="monto-valor">{datos.valor}</div>
 
                 <p className="nombre-empresa">{datos.empresa}</p>
+                {datos.nitEmpresa && (
+                  <p className="text-[11.5px] text-slate-500 font-medium -mt-1 mb-2">
+                    {datos.nitEmpresa}
+                  </p>
+                )}
 
-                <p className="descripcion-texto">
+                {/* Badge visible con # de Factura y Fecha del pago */}
+                <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#eef0fc] text-[#1B2075] rounded-full text-xs font-semibold mb-2 border border-blue-100/80">
+                  <span className="font-bold">Factura #{datos.idFactura}</span>
+                  <span className="text-blue-300">•</span>
+                  <span>{datos.fechaHora}</span>
+                </div>
+
+                {/* Tarjeta de detalles completos de la factura pagada */}
+                <div className="detalles-factura">
+                  <div className="fila-detalle">
+                    <span className="label-detalle">No. de Factura</span>
+                    <strong className="valor-detalle text-[#1B2075]">#{datos.idFactura}</strong>
+                  </div>
+
+                  <div className="fila-detalle">
+                    <span className="label-detalle">Fecha del pago</span>
+                    <span className="valor-detalle">{datos.fechaHora}</span>
+                  </div>
+
+                  {datos.medioPago && (
+                    <div className="fila-detalle">
+                      <span className="label-detalle">Medio de pago</span>
+                      <span className="valor-detalle">{datos.medioPago}</span>
+                    </div>
+                  )}
+
+                  {datos.referenciaPago && (
+                    <div className="fila-detalle">
+                      <span className="label-detalle">Ref. de pago</span>
+                      <span className="valor-detalle font-mono text-[11px] text-slate-700">{datos.referenciaPago}</span>
+                    </div>
+                  )}
+
+                  {datos.pagador && (
+                    <div className="fila-detalle">
+                      <span className="label-detalle">Pagador</span>
+                      <span className="valor-detalle">{datos.pagador}</span>
+                    </div>
+                  )}
+
+                  {datos.nitPagador && (
+                    <div className="fila-detalle">
+                      <span className="label-detalle">Identificación</span>
+                      <span className="valor-detalle">{datos.nitPagador}</span>
+                    </div>
+                  )}
+
+                  {datos.subtotal && (
+                    <div className="fila-detalle">
+                      <span className="label-detalle">Subtotal</span>
+                      <span className="valor-detalle">{datos.subtotal}</span>
+                    </div>
+                  )}
+
+                  {datos.iva && (
+                    <div className="fila-detalle">
+                      <span className="label-detalle">IVA</span>
+                      <span className="valor-detalle">{datos.iva}</span>
+                    </div>
+                  )}
+
+                  <div className="fila-detalle">
+                    <span className="label-detalle">Estado</span>
+                    <span className="valor-detalle text-emerald-600 font-bold flex items-center gap-1.5">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block"></span>
+                      Aprobada
+                    </span>
+                  </div>
+                </div>
+
+                <p className="descripcion-texto mt-1">
                   Comparte este comprobante al teléfono del transportista o permítele escanear este QR para confirmar el pago de la factura
                 </p>
               </motion.div>

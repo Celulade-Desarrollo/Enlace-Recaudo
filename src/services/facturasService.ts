@@ -256,9 +256,7 @@ export const facturasService = {
 
     const iniciales: DetalleFactura[] = Object.values(FACTURAS_MOCK).map((mock) => ({
       ...mock,
-      fechaHora: mock.fechaHora && !mock.fechaHora.includes('13 Ago 2026') && !mock.fechaHora.includes('Ago 2026')
-        ? mock.fechaHora
-        : obtenerFechaHoraActual()
+      fechaHora: mock.fechaHora || obtenerFechaHoraActual()
     }));
 
     const resultado = [...historial];
