@@ -40,5 +40,12 @@
     "codigo": "1552",
     "icono": "/nubank_icon.png",
     "tipo": "banco"
+  },
+  {
+    "id": "bancow",
+    "nombre": "Banco W",
+    "codigo": "1062",
+    "icono": "/bancow_icon.png",
+    "tipo": "banco"
   }
 ]

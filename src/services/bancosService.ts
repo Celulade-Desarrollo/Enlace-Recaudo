@@ -63,6 +63,13 @@ const BANCOS_FALLBACK: Banco[] = [
     codigo: '1552',
     icono: '/nubank_icon.png',
     tipo: 'banco'
+  },
+  {
+    id: 'bancow',
+    nombre: 'Banco W',
+    codigo: '1062',
+    icono: '/bancow_icon.png',
+    tipo: 'banco'
   }
 ];
 
@@ -93,7 +100,7 @@ const INITIAL_MEDIOS_DE_PAGO: MedioDePago[] = [
     id: 'bolsillo-3',
     bancoId: 'bolsillo',
     nombre: 'Saldo en mi bolsillo',
-    icono: 'wallet',
+    icono: '/bancow_icon.png',
     tipo: 'bolsillo',
     saldoDisponible: '$157,433.58'
   }
@@ -107,6 +114,8 @@ const ICON_MAP: Record<string, string> = {
   davivienda: '/davivienda_icon.png',
   bbva: '/bbva_icon.png',
   nu: '/nubank_icon.png',
+  bolsillo: '/bancow_icon.png',
+  bancow: '/bancow_icon.png'
 };
 
 // Deducir el tipo de llave según el valor ingresado
@@ -157,6 +166,9 @@ export const bancosService = {
           let updated = { ...m };
           if (m.tipo === 'llave' && ICON_MAP[m.bancoId]) {
             updated.icono = ICON_MAP[m.bancoId];
+          }
+          if (m.tipo === 'bolsillo' || m.id === 'bolsillo-3' || m.bancoId === 'bolsillo') {
+            updated.icono = '/bancow_icon.png';
           }
           if (m.tipo === 'llave' && !updated.tipoLlave && m.valorLlave) {
             updated.tipoLlave = inferirTipoLlave(m.valorLlave);
