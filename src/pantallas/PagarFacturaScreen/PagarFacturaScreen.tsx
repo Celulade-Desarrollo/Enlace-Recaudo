@@ -80,7 +80,17 @@ export const PagarFacturaScreen: React.FC<PagarFacturaScreenProps> = ({
 
   // Al inscribir una nueva llave desde el modal
   const handleNuevaLlaveInscrita = (nueva: MedioDePago) => {
-    setMediosDePago((prev) => [nueva, ...prev]);
+    setMediosDePago((prev) => {
+      const bolsillo = prev.find((m) => m.tipo === 'bolsillo');
+      const efectivo = prev.find((m) => m.tipo === 'efectivo');
+      const demas = prev.filter((m) => m !== bolsillo && m !== efectivo);
+      const resultado: MedioDePago[] = [];
+      if (bolsillo) resultado.push(bolsillo);
+      if (efectivo) resultado.push(efectivo);
+      resultado.push(nueva);
+      resultado.push(...demas);
+      return resultado;
+    });
     setSelectedMethodId(nueva.id);
   };
 
@@ -319,7 +329,7 @@ export const PagarFacturaScreen: React.FC<PagarFacturaScreenProps> = ({
             <div className="flex-1 flex flex-col mb-8">
               <div className="flex items-center justify-between mb-3">
                 <h2 className="text-base sm:text-[17px] font-bold text-[#1B2075] tracking-tight">
-                  Medio de Pago
+                  Opciones de pago
                 </h2>
                 {mediosDePago.length > 0 && (
                   <button
