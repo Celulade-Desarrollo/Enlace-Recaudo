@@ -5,5 +5,6 @@ export * from './TransportistaHomeScreen';
 export * from './FacturasARecaudarScreen';
 export * from './GenerarFacturaScreen';
 export * from './CobroQrBrebScreen';
+export * from './CobroEfectivoScreen/CobroEfectivoScreen';
 export * from './TransportistaPagoRecibidoScreen';
 export * from './TransportistaFlow';
