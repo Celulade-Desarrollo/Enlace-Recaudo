@@ -1,24 +1,32 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { MobileStatusBar } from '../../components/atoms/MobileStatusBar/MobileStatusBar';
 import { MobileHomeBar } from '../../components/atoms/MobileHomeBar/MobileHomeBar';
 import { Icon } from '../../components/atoms/Icon/Icon';
+import { ModalOpcionPago } from '../../components/molecules/ModalOpcionPago/ModalOpcionPago';
 import type { PrefacturaCliente } from '../../services/transportistaService';
 import { obtenerPartesColombia } from '../../types/transaccion';
 
 interface GenerarFacturaScreenProps {
   prefactura: PrefacturaCliente;
   onBack: () => void;
-  onGenerarQr: () => void;
+  onPagoCompletoDigital: () => void;
+  onPagoParcial: (montoDigital: number, restanteEfectivo: number) => void;
+  onPagoEfectivo: () => void;
+  onGenerarQr?: () => void;
   className?: string;
 }
 
 export const GenerarFacturaScreen: React.FC<GenerarFacturaScreenProps> = ({
   prefactura,
   onBack,
+  onPagoCompletoDigital,
+  onPagoParcial,
+  onPagoEfectivo,
   onGenerarQr,
   className = ''
 }) => {
+  const [isModalOpcionesOpen, setIsModalOpcionesOpen] = useState(false);
   // Asegurar fecha y hora oficial de Colombia
   const partesCol = obtenerPartesColombia(new Date());
   const fechaHoraActual = `${partesCol.dia} ${partesCol.mesTexto} ${partesCol.anio} ${partesCol.horaFormateada}`;
@@ -106,28 +114,46 @@ export const GenerarFacturaScreen: React.FC<GenerarFacturaScreenProps> = ({
           </div>
         </div>
 
-        {/* Caja informativa */}
-        <div className="w-full bg-[#EEF2FF] border border-[#C7D7FE] rounded-xl p-3.5 flex items-start gap-2.5 text-left mb-6">
-          <div className="text-[#2F3CB3] mt-0.5 shrink-0">
-            <Icon name="info-circle" size={18} stroke={2.2} />
-          </div>
-          <p className="text-xs text-[#1E293B] font-medium leading-relaxed">
-            Escanea el QR en la app del tendero o espera a recibir la notificación de pago.
-          </p>
-        </div>
+        <p className="text-[13px] text-[#8e8e93] text-center mb-6">
+          Elige la opción para cobrar esta factura al tendero.
+        </p>
 
-        {/* Botón Generar QR */}
+        {/* Botón Elegir opción de pago */}
         <div className="w-full mt-auto pt-1 pb-2">
           <motion.button
             type="button"
             whileTap={{ scale: 0.97 }}
-            onClick={onGenerarQr}
+            onClick={() => setIsModalOpcionesOpen(true)}
             className="w-full h-12 rounded-full bg-[#2F3CB3] hover:bg-[#2532a1] text-white font-bold text-sm shadow-md transition-all cursor-pointer flex items-center justify-center gap-2 select-none"
           >
-            <span>Generar QR</span>
+            <Icon name="wallet" size={18} stroke={2.2} />
+            <span>Elegir opción de pago</span>
           </motion.button>
         </div>
       </main>
+
+      {/* Modal Bottom Sheet para Elegir Opción de Pago */}
+      <ModalOpcionPago
+        isOpen={isModalOpcionesOpen}
+        onClose={() => setIsModalOpcionesOpen(false)}
+        prefactura={prefactura}
+        onSelectPagoCompletoDigital={() => {
+          setIsModalOpcionesOpen(false);
+          if (onPagoCompletoDigital) {
+            onPagoCompletoDigital();
+          } else if (onGenerarQr) {
+            onGenerarQr();
+          }
+        }}
+        onSelectPagoParcial={(montoDigital, restanteEfectivo) => {
+          setIsModalOpcionesOpen(false);
+          onPagoParcial(montoDigital, restanteEfectivo);
+        }}
+        onSelectPagoEfectivo={() => {
+          setIsModalOpcionesOpen(false);
+          onPagoEfectivo();
+        }}
+      />
 
       {/* Barra de inicio móvil */}
       <MobileHomeBar theme="dark" />
