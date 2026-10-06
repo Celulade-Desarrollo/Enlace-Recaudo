@@ -13,12 +13,13 @@ export interface MedioDePago {
   bancoId: string;
   nombre: string;
   icono: string;
-  tipo: 'llave' | 'bolsillo';
+  tipo: 'llave' | 'bolsillo' | 'efectivo';
   valorLlave?: string;
   saldoDisponible?: string;
   tipoLlave?: TipoLlave;
   fechaInscripcion?: string;
   esPrincipal?: boolean;
+  descripcion?: string;
 }
 
 const BANCOS_FALLBACK: Banco[] = [
@@ -75,6 +76,22 @@ const BANCOS_FALLBACK: Banco[] = [
 
 const INITIAL_MEDIOS_DE_PAGO: MedioDePago[] = [
   {
+    id: 'bolsillo-3',
+    bancoId: 'bolsillo',
+    nombre: 'Saldo en mi bolsillo',
+    icono: '/bancow_icon.png',
+    tipo: 'bolsillo',
+    saldoDisponible: '$157,433.58'
+  },
+  {
+    id: 'efectivo-bancow',
+    bancoId: 'efectivo',
+    nombre: 'Efectivo',
+    icono: '/bancow_icon.png',
+    tipo: 'efectivo',
+    descripcion: 'Pago directo en efectivo'
+  },
+  {
     id: 'nequi-1',
     bancoId: 'nequi',
     nombre: 'Nequi',
@@ -95,14 +112,6 @@ const INITIAL_MEDIOS_DE_PAGO: MedioDePago[] = [
     tipoLlave: 'documento',
     fechaInscripcion: '04 Feb 2025',
     esPrincipal: false
-  },
-  {
-    id: 'bolsillo-3',
-    bancoId: 'bolsillo',
-    nombre: 'Saldo en mi bolsillo',
-    icono: '/bancow_icon.png',
-    tipo: 'bolsillo',
-    saldoDisponible: '$157,433.58'
   }
 ];
 
@@ -115,7 +124,8 @@ const ICON_MAP: Record<string, string> = {
   bbva: '/bbva_icon.png',
   nu: '/nubank_icon.png',
   bolsillo: '/bancow_icon.png',
-  bancow: '/bancow_icon.png'
+  bancow: '/bancow_icon.png',
+  efectivo: '/bancow_icon.png'
 };
 
 // Deducir el tipo de llave según el valor ingresado
@@ -158,16 +168,20 @@ export const bancosService = {
    */
   async getMediosDePago(): Promise<MedioDePago[]> {
     const stored = localStorage.getItem('enlace_medios_pago');
+    let lista: MedioDePago[] = INITIAL_MEDIOS_DE_PAGO;
     if (stored) {
       try {
         const parsed: MedioDePago[] = JSON.parse(stored);
         // Actualizar iconos de llaves existentes con los nuevos logos de public/ y asegurar campos
-        return parsed.map((m) => {
+        lista = parsed.map((m) => {
           let updated = { ...m };
           if (m.tipo === 'llave' && ICON_MAP[m.bancoId]) {
             updated.icono = ICON_MAP[m.bancoId];
           }
           if (m.tipo === 'bolsillo' || m.id === 'bolsillo-3' || m.bancoId === 'bolsillo') {
+            updated.icono = '/bancow_icon.png';
+          }
+          if (m.tipo === 'efectivo' || m.id === 'efectivo-bancow' || m.bancoId === 'efectivo') {
             updated.icono = '/bancow_icon.png';
           }
           if (m.tipo === 'llave' && !updated.tipoLlave && m.valorLlave) {
@@ -179,7 +193,23 @@ export const bancosService = {
         console.error('Error parseando medios de pago guardados', e);
       }
     }
-    return INITIAL_MEDIOS_DE_PAGO;
+
+    // 1ra opción: Saldo en mi bolsillo
+    const bolsillo = lista.find(
+      (m) => m.tipo === 'bolsillo' || m.id === 'bolsillo-3' || m.nombre.toLowerCase().includes('bolsillo')
+    ) || INITIAL_MEDIOS_DE_PAGO[0];
+
+    // 2da opción: Efectivo justo debajo con logo de Bancow
+    const efectivo = lista.find(
+      (m) => m.tipo === 'efectivo' || m.id === 'efectivo-bancow' || m.nombre.toLowerCase().includes('efectivo')
+    ) || INITIAL_MEDIOS_DE_PAGO[1];
+
+    // Llaves inscritas restantes
+    const demas = lista.filter(
+      (m) => m.id !== bolsillo.id && m.id !== efectivo.id && m.tipo !== 'bolsillo' && m.tipo !== 'efectivo'
+    );
+
+    return [bolsillo, efectivo, ...demas];
   },
 
   /**
@@ -225,7 +255,10 @@ export const bancosService = {
       esPrincipal: existingKeys.length === 0 // Primera llave es la principal por defecto
     };
 
-    const updated = [nueva, ...current];
+    const bolsillo = current.find((m) => m.tipo === 'bolsillo') || INITIAL_MEDIOS_DE_PAGO[0];
+    const efectivo = current.find((m) => m.tipo === 'efectivo') || INITIAL_MEDIOS_DE_PAGO[1];
+    const demas = current.filter((m) => m.tipo !== 'bolsillo' && m.tipo !== 'efectivo');
+    const updated = [bolsillo, efectivo, nueva, ...demas];
     await this.saveMediosDePago(updated);
     return nueva;
   },
