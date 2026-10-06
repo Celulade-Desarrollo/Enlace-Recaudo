@@ -18,19 +18,19 @@ export const PaymentMethodCard: React.FC<PaymentMethodCardProps> = ({
   return (
     <div
       onClick={() => onSelect(method)}
-      className={`rounded-2xl p-4 flex items-center gap-3.5 transition-all duration-200 cursor-pointer select-none active:scale-[0.99] ${isSelected
-          ? 'border-2 border-[#1B2075] bg-[#eef0fc]/60 shadow-sm ring-1 ring-[#1B2075]/10'
-          : 'border border-slate-100 bg-white shadow-[0_2px_8px_rgba(0,0,0,0.04)] hover:border-slate-200 hover:shadow-md'
+      className={`rounded-2xl p-4 flex items-center gap-3.5 transition-all duration-150 cursor-pointer select-none active:scale-[0.99] ${isSelected
+          ? 'border-2 border-black bg-white shadow-sm'
+          : 'border border-[#e5e5ea] bg-white hover:border-[#d1d1d6]'
         } ${className}`}
     >
       {/* Icono del medio de pago */}
       <div className="shrink-0">
         {method.tipo === 'bolsillo' ? (
-          <div className="w-12 h-12 rounded-full bg-[#eaecfb] text-[#2F399B] flex items-center justify-center">
-            <Icon name="wallet" size={24} stroke={2} />
+          <div className="w-11 h-11 rounded-xl bg-[#f2f2f7] text-black flex items-center justify-center">
+            <Icon name="wallet" size={22} stroke={2} />
           </div>
         ) : (
-          <div className="w-12 h-12 rounded-full overflow-hidden flex items-center justify-center bg-white border border-slate-100 shadow-2xs">
+          <div className="w-11 h-11 rounded-xl overflow-hidden flex items-center justify-center bg-white border border-[#e5e5ea]">
             <img
               src={method.icono}
               alt={method.nombre}
