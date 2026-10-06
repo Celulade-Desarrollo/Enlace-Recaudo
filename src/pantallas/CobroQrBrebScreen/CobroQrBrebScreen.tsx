@@ -7,6 +7,9 @@ import type { PrefacturaCliente } from '../../services/transportistaService';
 
 interface CobroQrBrebScreenProps {
   prefactura: PrefacturaCliente;
+  montoCobro?: number;
+  esParcial?: boolean;
+  restanteEfectivo?: number;
   onBack: () => void;
   onConfirmarPago: () => void;
   className?: string;
@@ -15,12 +18,19 @@ interface CobroQrBrebScreenProps {
 
 export const CobroQrBrebScreen: React.FC<CobroQrBrebScreenProps> = ({
   prefactura,
+  montoCobro,
+  esParcial = false,
+  restanteEfectivo = 0,
   onBack,
   onConfirmarPago,
   className = '',
   qrImageUrl = '/qr_breb_placeholder.svg'
 }) => {
   const [procesando, setProcesando] = useState(false);
+
+  const valorMostrado = montoCobro !== undefined
+    ? `$${montoCobro.toLocaleString('es-CO')}`
+    : prefactura.saldoTotal;
 
   const handleSimularConfirmacion = () => {
     setProcesando(true);
@@ -55,42 +65,46 @@ export const CobroQrBrebScreen: React.FC<CobroQrBrebScreenProps> = ({
       </header>
 
       {/* Contenido principal */}
-      <main className="flex-1 flex flex-col items-center px-6 pt-4 pb-4 text-center">
-        {/* Encabezado con monto y datos del comercio */}
-        <div className="flex flex-col items-center mb-3">
-          <span className="text-xs text-slate-500 font-medium">
-            Valor a cobrar
-          </span>
-          <div className="text-[32px] sm:text-[36px] font-black text-slate-900 tracking-tight leading-none mt-1">
-            {prefactura.saldoTotal}
+      <main className="flex-1 flex flex-col items-center justify-between px-6 pt-5 pb-4 text-center">
+        {/* Encabezado con monto */}
+        <div className="flex flex-col items-center">
+          {esParcial && (
+            <span className="text-[12px] font-semibold text-[#8e8e93] uppercase tracking-wider mb-1">
+              Paso 1 · Cobro digital
+            </span>
+          )}
+
+          <div className="text-[34px] sm:text-[38px] font-black text-slate-900 font-sans tracking-tight leading-none mt-1">
+            {valorMostrado}
           </div>
 
-          <div className="flex items-center gap-2 text-xs text-slate-600 mt-2">
-            <span className="font-bold text-slate-800">{prefactura.pagador}</span>
-            <span>•</span>
-            <span>Factura #{prefactura.numeroPrefactura}</span>
-          </div>
+          <p className="text-[13px] text-slate-500 font-medium mt-1">
+            {prefactura.pagador} · #{prefactura.numeroPrefactura}
+          </p>
+
+          {esParcial && (
+            <p className="text-[13px] text-slate-500 font-medium mt-1.5">
+              Restante en efectivo: <strong className="font-black text-slate-900 font-sans">${restanteEfectivo.toLocaleString('es-CO')}</strong>
+            </p>
+          )}
         </div>
 
-        {/* ========================================================================= */}
-        {/* ===== ESPACIO PARA QR BRE-B REAL DE UN BANCO REAL (LABEL CONFIGURABLE) ===== */}
-        {/* ========================================================================= */}
+        {/* Espacio para QR Bre-B */}
         <motion.div
-          initial={{ scale: 0.9, opacity: 0 }}
+          initial={{ scale: 0.95, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
-          transition={{ type: 'spring', stiffness: 300, damping: 22 }}
-          className="relative p-4 bg-white rounded-3xl border border-slate-200/90 shadow-[0_8px_30px_rgba(0,0,0,0.08)] flex flex-col items-center my-auto"
+          transition={{ type: 'spring', stiffness: 300, damping: 24 }}
+          className="relative p-5 bg-white rounded-3xl border border-[#e5e5ea] shadow-sm flex flex-col items-center my-auto"
         >
-          {/* Label indicador solicitado para reemplazo del QR real */}
-          <div className="mb-2.5">
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-50 border border-blue-200 text-[#2F3CB3] text-[11px] font-bold">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#2F3CB3] animate-pulse"></span>
-              Espacio para QR Bre-B Real
+          {/* Label indicador */}
+          <div className="mb-2">
+            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full bg-[#f2f2f7] text-[#1c1c1e] text-[11px] font-semibold">
+              QR Bre-B
             </span>
           </div>
 
           {/* Imagen del código QR */}
-          <div className="w-[220px] h-[220px] rounded-2xl overflow-hidden bg-slate-50 flex items-center justify-center p-2 border border-slate-100">
+          <div className="w-[210px] h-[210px] rounded-2xl overflow-hidden bg-[#f9f9fb] flex items-center justify-center p-2">
             <img
               src={qrImageUrl}
               alt="Código QR de Pago Bre-B"
@@ -98,7 +112,7 @@ export const CobroQrBrebScreen: React.FC<CobroQrBrebScreenProps> = ({
             />
           </div>
 
-          <div className="flex items-center gap-2 mt-2.5 text-xs font-semibold text-slate-700">
+          <div className="flex items-center gap-1.5 mt-2.5 text-xs font-semibold text-slate-600">
             <img
               src="/enlacelogo.png"
               alt="Enlace"
@@ -111,13 +125,8 @@ export const CobroQrBrebScreen: React.FC<CobroQrBrebScreenProps> = ({
           </div>
         </motion.div>
 
-        {/* Texto explicativo para el tendero */}
-        <p className="text-xs text-slate-500 font-medium max-w-[280px] leading-relaxed mt-3 mb-4">
-          Pídele al tendero que escanee este código desde Bancolombia, Nequi, Daviplata o cualquier app bancaria con Bre-B.
-        </p>
-
-        {/* Botón de confirmación / simulación de recepción de pago */}
-        <div className="w-full mt-auto pt-1 pb-2">
+        {/* Botón de confirmación */}
+        <div className="w-full pt-2">
           <motion.button
             type="button"
             whileTap={{ scale: 0.97 }}
@@ -126,12 +135,11 @@ export const CobroQrBrebScreen: React.FC<CobroQrBrebScreenProps> = ({
             className="w-full h-12 rounded-full bg-[#2F3CB3] hover:bg-[#2532a1] text-white font-bold text-sm shadow-md transition-all cursor-pointer flex items-center justify-center gap-2 disabled:opacity-70 select-none"
           >
             {procesando ? (
-              <span>Confirmando pago recibido...</span>
+              <span>Confirmando...</span>
             ) : (
-              <>
-                <Icon name="check" size={18} stroke={3} />
-                <span>Confirmar Pago Recibido</span>
-              </>
+              <span>
+                {esParcial ? 'Confirmar y cobrar efectivo' : 'Confirmar pago recibido'}
+              </span>
             )}
           </motion.button>
         </div>
