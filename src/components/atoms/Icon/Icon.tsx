@@ -20,6 +20,11 @@ import {
   IconBell,
   IconQrcode,
   IconInfoCircle,
+  IconCash,
+  IconArrowsSplit,
+  IconDeviceMobile,
+  IconCalculator,
+  IconArrowRight,
   type TablerIcon
 } from '@tabler/icons-react';
 
@@ -43,7 +48,12 @@ export type IconName =
   | 'circle-check'
   | 'bell'
   | 'qrcode'
-  | 'info-circle';
+  | 'info-circle'
+  | 'cash'
+  | 'arrows-split'
+  | 'device-mobile'
+  | 'calculator'
+  | 'arrow-right';
 
 const iconMap: Record<IconName, TablerIcon> = {
   home: IconHome,
@@ -66,6 +76,11 @@ const iconMap: Record<IconName, TablerIcon> = {
   bell: IconBell,
   qrcode: IconQrcode,
   'info-circle': IconInfoCircle,
+  cash: IconCash,
+  'arrows-split': IconArrowsSplit,
+  'device-mobile': IconDeviceMobile,
+  calculator: IconCalculator,
+  'arrow-right': IconArrowRight,
 };
 
 interface IconProps {
