@@ -17,7 +17,7 @@ export const PaymentMethodCard: React.FC<PaymentMethodCardProps> = ({
 }) => {
   const [imgError, setImgError] = React.useState(false);
 
-  const iconSrc = method.tipo === 'bolsillo'
+  const iconSrc = (method.tipo === 'bolsillo' || method.tipo === 'efectivo' || method.bancoId === 'efectivo')
     ? (!method.icono || method.icono === 'wallet' ? '/bancow_icon.png' : method.icono)
     : method.icono;
 
@@ -42,7 +42,7 @@ export const PaymentMethodCard: React.FC<PaymentMethodCardProps> = ({
                 }`}
               onError={(e) => {
                 const target = e.target as HTMLImageElement;
-                if (method.tipo === 'bolsillo' && !target.src.includes('bancow_icon.png')) {
+                if ((method.tipo === 'bolsillo' || method.tipo === 'efectivo') && !target.src.includes('bancow_icon.png')) {
                   target.src = '/bancow_icon.png';
                 } else {
                   setImgError(true);
@@ -51,7 +51,7 @@ export const PaymentMethodCard: React.FC<PaymentMethodCardProps> = ({
             />
           ) : (
             <div className="w-full h-full bg-[#eaecfb] text-[#2F399B] flex items-center justify-center">
-              <Icon name="wallet" size={24} stroke={2} />
+              <Icon name={method.tipo === 'efectivo' ? 'coins' : 'wallet'} size={24} stroke={2} />
             </div>
           )}
         </div>
@@ -68,11 +68,15 @@ export const PaymentMethodCard: React.FC<PaymentMethodCardProps> = ({
               <span className="text-slate-500 font-normal">Llave</span>
               <span className="font-bold text-slate-900">{method.valorLlave}</span>
             </>
-          ) : (
+          ) : method.tipo === 'bolsillo' ? (
             <>
               <span className="text-slate-500 font-normal">Saldo</span>
               <span className="font-bold text-slate-900">{method.saldoDisponible}</span>
             </>
+          ) : (
+            <span className="text-slate-500 font-normal">
+              {method.descripcion || 'Pago directo en efectivo'}
+            </span>
           )}
         </div>
       </div>
