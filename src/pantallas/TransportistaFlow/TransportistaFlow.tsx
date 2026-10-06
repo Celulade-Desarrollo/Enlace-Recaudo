@@ -4,7 +4,11 @@ import { TransportistaHomeScreen } from '../TransportistaHomeScreen/Transportist
 import { FacturasARecaudarScreen } from '../FacturasARecaudarScreen/FacturasARecaudarScreen';
 import { GenerarFacturaScreen } from '../GenerarFacturaScreen/GenerarFacturaScreen';
 import { CobroQrBrebScreen } from '../CobroQrBrebScreen/CobroQrBrebScreen';
-import { TransportistaPagoRecibidoScreen } from '../TransportistaPagoRecibidoScreen/TransportistaPagoRecibidoScreen';
+import { CobroEfectivoScreen, type DetallesConfirmacionEfectivo } from '../CobroEfectivoScreen/CobroEfectivoScreen';
+import {
+  TransportistaPagoRecibidoScreen,
+  type DetallesPagoRealizado
+} from '../TransportistaPagoRecibidoScreen/TransportistaPagoRecibidoScreen';
 import {
   transportistaService,
   type TiendaRuta,
@@ -16,12 +20,19 @@ type TransportistaPaso =
   | 'facturas'
   | 'generar'
   | 'qr'
+  | 'efectivo'
   | 'recibido';
 
 export const TransportistaFlow: React.FC = () => {
   const [paso, setPaso] = useState<TransportistaPaso>('home');
   const [tiendaSeleccionada, setTiendaSeleccionada] = useState<TiendaRuta | null>(null);
   const [prefacturaSeleccionada, setPrefacturaSeleccionada] = useState<PrefacturaCliente | null>(null);
+
+  // Estados del flujo de pago
+  const [pagoInfo, setPagoInfo] = useState<DetallesPagoRealizado | null>(null);
+  const [esPagoParcial, setEsPagoParcial] = useState<boolean>(false);
+  const [montoParcialQr, setMontoParcialQr] = useState<number | undefined>(undefined);
+  const [restanteEfectivo, setRestanteEfectivo] = useState<number>(0);
 
   // Soporte nativo para botón 'Atrás' en celulares (Mobile First: PopState / Gestos de retroceso)
   useEffect(() => {
@@ -56,16 +67,68 @@ export const TransportistaFlow: React.FC = () => {
   // 2. Al seleccionar una prefactura a recaudar
   const handleSelectPrefactura = (prefactura: PrefacturaCliente) => {
     setPrefacturaSeleccionada(prefactura);
+    setPagoInfo(null);
+    setEsPagoParcial(false);
+    setMontoParcialQr(undefined);
+    setRestanteEfectivo(0);
     transicionarA('generar');
   };
 
-  // 3. Al pulsar "Generar QR"
-  const handleGenerarQr = () => {
+  // 3a. Opción 1: Pago completo por medios digitales
+  const handlePagoCompletoDigital = () => {
+    setEsPagoParcial(false);
+    setMontoParcialQr(undefined);
+    setRestanteEfectivo(0);
+    setPagoInfo({ tipo: 'digital_completo' });
     transicionarA('qr');
   };
 
+  // 3b. Opción 2: Pago parcial por medios digitales y efectivo
+  const handlePagoParcial = (montoDigital: number, restante: number) => {
+    setEsPagoParcial(true);
+    setMontoParcialQr(montoDigital);
+    setRestanteEfectivo(restante);
+    setPagoInfo({
+      tipo: 'parcial',
+      montoDigital,
+      montoEfectivo: restante
+    });
+    transicionarA('qr');
+  };
+
+  // 3c. Opción 3: Pago en efectivo
+  const handlePagoEfectivo = () => {
+    if (!prefacturaSeleccionada) return;
+    setEsPagoParcial(false);
+    setMontoParcialQr(undefined);
+    setRestanteEfectivo(prefacturaSeleccionada.saldoTotalNum);
+    setPagoInfo({
+      tipo: 'efectivo',
+      montoEfectivo: prefacturaSeleccionada.saldoTotalNum
+    });
+    transicionarA('efectivo');
+  };
+
   // 4. Al confirmar el pago en la pantalla del QR
-  const handleConfirmarPago = () => {
+  const handleConfirmarPagoQr = () => {
+    if (esPagoParcial) {
+      // En pago parcial, al marcar pago recibido por QR, pasamos a cobrar el restante en efectivo
+      transicionarA('efectivo');
+    } else {
+      // En pago completo digital, registramos y finalizamos
+      if (tiendaSeleccionada && prefacturaSeleccionada) {
+        transportistaService.registrarPagoPrefactura(
+          tiendaSeleccionada.id,
+          prefacturaSeleccionada.numeroPrefactura,
+          prefacturaSeleccionada.saldoTotal
+        );
+      }
+      transicionarA('recibido');
+    }
+  };
+
+  // 5. Al confirmar el pago en efectivo (completo o restante)
+  const handleConfirmarPagoEfectivo = (detalles: DetallesConfirmacionEfectivo) => {
     if (tiendaSeleccionada && prefacturaSeleccionada) {
       transportistaService.registrarPagoPrefactura(
         tiendaSeleccionada.id,
@@ -73,10 +136,28 @@ export const TransportistaFlow: React.FC = () => {
         prefacturaSeleccionada.saldoTotal
       );
     }
+
+    if (esPagoParcial) {
+      setPagoInfo({
+        tipo: 'parcial',
+        montoDigital: montoParcialQr,
+        montoEfectivo: restanteEfectivo,
+        efectivoRecibido: detalles.montoRecibido,
+        cambio: detalles.cambio
+      });
+    } else {
+      setPagoInfo({
+        tipo: 'efectivo',
+        montoEfectivo: prefacturaSeleccionada?.saldoTotalNum,
+        efectivoRecibido: detalles.montoRecibido,
+        cambio: detalles.cambio
+      });
+    }
+
     transicionarA('recibido');
   };
 
-  // 5. Retroceso seguro
+  // 6. Retroceso seguro
   const handleBack = (pasoDestino: TransportistaPaso) => {
     if (window.history.state && window.history.state.paso) {
       window.history.back();
@@ -85,11 +166,15 @@ export const TransportistaFlow: React.FC = () => {
     }
   };
 
-  // 6. Al regresar del comprobante a "Ruta de hoy"
+  // 7. Al regresar del comprobante a "Ruta de hoy"
   const handleRegresarAHome = () => {
     setPaso('home');
     setTiendaSeleccionada(null);
     setPrefacturaSeleccionada(null);
+    setPagoInfo(null);
+    setEsPagoParcial(false);
+    setMontoParcialQr(undefined);
+    setRestanteEfectivo(0);
     try {
       window.history.replaceState({ paso: 'home' }, '');
     } catch {
@@ -146,7 +231,9 @@ export const TransportistaFlow: React.FC = () => {
               <GenerarFacturaScreen
                 prefactura={prefacturaSeleccionada}
                 onBack={() => handleBack('facturas')}
-                onGenerarQr={handleGenerarQr}
+                onPagoCompletoDigital={handlePagoCompletoDigital}
+                onPagoParcial={handlePagoParcial}
+                onPagoEfectivo={handlePagoEfectivo}
               />
             </motion.div>
           )}
@@ -162,8 +249,31 @@ export const TransportistaFlow: React.FC = () => {
             >
               <CobroQrBrebScreen
                 prefactura={prefacturaSeleccionada}
+                montoCobro={montoParcialQr}
+                esParcial={esPagoParcial}
+                restanteEfectivo={restanteEfectivo}
                 onBack={() => handleBack('generar')}
-                onConfirmarPago={handleConfirmarPago}
+                onConfirmarPago={handleConfirmarPagoQr}
+              />
+            </motion.div>
+          )}
+
+          {paso === 'efectivo' && prefacturaSeleccionada && (
+            <motion.div
+              key="flow-efectivo"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              transition={{ duration: 0.2, ease: [0.25, 1, 0.5, 1] }}
+              className="w-full flex-1 flex flex-col"
+            >
+              <CobroEfectivoScreen
+                prefactura={prefacturaSeleccionada}
+                montoACobrar={esPagoParcial ? restanteEfectivo : prefacturaSeleccionada.saldoTotalNum}
+                esParcial={esPagoParcial}
+                montoDigitalPagado={montoParcialQr}
+                onBack={() => handleBack(esPagoParcial ? 'qr' : 'generar')}
+                onConfirmarPago={handleConfirmarPagoEfectivo}
               />
             </motion.div>
           )}
@@ -179,6 +289,7 @@ export const TransportistaFlow: React.FC = () => {
             >
               <TransportistaPagoRecibidoScreen
                 prefactura={prefacturaSeleccionada}
+                detallesPago={pagoInfo}
                 onRegresar={handleRegresarAHome}
               />
             </motion.div>
