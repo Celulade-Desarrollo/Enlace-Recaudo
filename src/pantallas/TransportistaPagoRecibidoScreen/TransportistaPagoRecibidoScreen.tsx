@@ -5,15 +5,25 @@ import { MobileHomeBar } from '../../components/atoms/MobileHomeBar/MobileHomeBa
 import type { PrefacturaCliente } from '../../services/transportistaService';
 import { obtenerPartesColombia } from '../../types/transaccion';
 
+export interface DetallesPagoRealizado {
+  tipo: 'digital_completo' | 'parcial' | 'efectivo';
+  montoDigital?: number;
+  montoEfectivo?: number;
+  efectivoRecibido?: number;
+  cambio?: number;
+}
+
 interface TransportistaPagoRecibidoScreenProps {
   prefactura: PrefacturaCliente;
   onRegresar: () => void;
+  detallesPago?: DetallesPagoRealizado | null;
   className?: string;
 }
 
 export const TransportistaPagoRecibidoScreen: React.FC<TransportistaPagoRecibidoScreenProps> = ({
   prefactura,
   onRegresar,
+  detallesPago,
   className = ''
 }) => {
   // Fecha y hora oficial en vivo de Colombia
@@ -106,8 +116,60 @@ export const TransportistaPagoRecibidoScreen: React.FC<TransportistaPagoRecibido
 
           <div className="flex justify-between py-2 border-b border-dashed border-slate-200">
             <span className="font-bold text-slate-900 text-left">Medio de Pago</span>
-            <span className="text-slate-800 font-medium text-right">{prefactura.medioPago}</span>
+            <span className="text-slate-800 font-medium text-right">
+              {detallesPago?.tipo === 'parcial'
+                ? 'Mixto (QR Bre-B + Efectivo)'
+                : detallesPago?.tipo === 'efectivo'
+                ? 'Efectivo'
+                : prefactura.medioPago}
+            </span>
           </div>
+
+          {detallesPago?.tipo === 'parcial' && (
+            <>
+              <div className="flex justify-between py-2 border-b border-dashed border-slate-200">
+                <span className="font-bold text-indigo-900 text-left">Cobro QR Bre-B</span>
+                <span className="text-indigo-900 font-bold text-right">
+                  ${detallesPago.montoDigital?.toLocaleString('es-CO')}
+                </span>
+              </div>
+              <div className="flex justify-between py-2 border-b border-dashed border-slate-200">
+                <span className="font-bold text-emerald-900 text-left">Cobro en Efectivo</span>
+                <span className="text-emerald-900 font-bold text-right">
+                  ${detallesPago.montoEfectivo?.toLocaleString('es-CO')}
+                </span>
+              </div>
+              {detallesPago.cambio !== undefined && detallesPago.cambio > 0 && (
+                <div className="flex justify-between py-2 border-b border-dashed border-slate-200 bg-emerald-50/50 -mx-1 px-1 rounded-sm">
+                  <span className="font-bold text-emerald-800 text-left">Cambio entregado</span>
+                  <span className="text-emerald-800 font-bold text-right">
+                    ${detallesPago.cambio.toLocaleString('es-CO')}
+                  </span>
+                </div>
+              )}
+            </>
+          )}
+
+          {detallesPago?.tipo === 'efectivo' && (
+            <>
+              {detallesPago.efectivoRecibido !== undefined && detallesPago.efectivoRecibido > 0 && (
+                <div className="flex justify-between py-2 border-b border-dashed border-slate-200">
+                  <span className="font-bold text-slate-900 text-left">Efectivo Recibido</span>
+                  <span className="text-slate-800 font-medium text-right">
+                    ${detallesPago.efectivoRecibido.toLocaleString('es-CO')}
+                  </span>
+                </div>
+              )}
+              {detallesPago.cambio !== undefined && detallesPago.cambio > 0 && (
+                <div className="flex justify-between py-2 border-b border-dashed border-slate-200 bg-emerald-50/50 -mx-1 px-1 rounded-sm">
+                  <span className="font-bold text-emerald-800 text-left">Cambio entregado</span>
+                  <span className="text-emerald-800 font-bold text-right">
+                    ${detallesPago.cambio.toLocaleString('es-CO')}
+                  </span>
+                </div>
+              )}
+            </>
+          )}
 
           <div className="flex justify-between py-2 border-b border-dashed border-slate-200">
             <span className="font-bold text-slate-900 text-left">Fecha y Hora</span>
