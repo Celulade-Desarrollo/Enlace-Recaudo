@@ -75,7 +75,7 @@ export const CobroEfectivoScreen: React.FC<CobroEfectivoScreenProps> = ({
     <div className={`w-full flex-1 flex flex-col bg-white relative pb-3 ${className}`}>
       {/* Header con status bar */}
       <header className="w-full bg-[#2F3CB3] text-white pt-1 pb-3 px-4 select-none sticky top-0 z-20 shadow-xs">
-        <MobileStatusBar theme="light" time="9:30" />
+
 
         <div className="flex items-center justify-between pt-1">
           <button
@@ -157,11 +157,10 @@ export const CobroEfectivoScreen: React.FC<CobroEfectivoScreenProps> = ({
                 key={sug}
                 type="button"
                 onClick={() => setValorRecibido(sug)}
-                className={`px-4 py-2 rounded-full text-[13px] font-medium transition-all cursor-pointer active:scale-95 ${
-                  montoRecibidoNum === sug
-                    ? 'bg-black text-white'
-                    : 'bg-[#f2f2f7] hover:bg-[#e5e5ea] text-black'
-                }`}
+                className={`px-4 py-2 rounded-full text-[13px] font-medium transition-all cursor-pointer active:scale-95 ${montoRecibidoNum === sug
+                  ? 'bg-black text-white'
+                  : 'bg-[#f2f2f7] hover:bg-[#e5e5ea] text-black'
+                  }`}
               >
                 {sug === montoACobrar ? 'Exacto ' : ''}${sug.toLocaleString('es-CO')}
               </button>
