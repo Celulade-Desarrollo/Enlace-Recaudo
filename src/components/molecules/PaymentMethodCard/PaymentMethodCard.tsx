@@ -17,7 +17,14 @@ export const PaymentMethodCard: React.FC<PaymentMethodCardProps> = ({
 }) => {
   const [imgError, setImgError] = React.useState(false);
 
-  const iconSrc = (method.tipo === 'bolsillo' || method.tipo === 'efectivo' || method.bancoId === 'efectivo')
+  const isEfectivo =
+    method.tipo === 'efectivo' ||
+    method.bancoId === 'efectivo' ||
+    method.nombre.toLowerCase().includes('efectivo');
+
+  const iconSrc = isEfectivo
+    ? (method.icono && !method.icono.includes('bancow') ? method.icono : '/billete_icon.svg')
+    : (method.tipo === 'bolsillo' || method.tipo === 'microcredito' || method.bancoId === 'bolsillo' || method.bancoId === 'bancow')
     ? (!method.icono || method.icono === 'wallet' ? '/bancow_icon.png' : method.icono)
     : method.icono;
 
@@ -36,22 +43,29 @@ export const PaymentMethodCard: React.FC<PaymentMethodCardProps> = ({
             <img
               src={iconSrc}
               alt={method.nombre}
-              className={`object-contain transition-transform ${method.bancoId === 'nequi' || iconSrc.includes('nequi')
-                ? 'w-[58%] h-[58%]'
-                : 'w-full h-full p-1'
+              className={`object-contain transition-transform ${
+                method.bancoId === 'nequi' || iconSrc.includes('nequi')
+                  ? 'w-[58%] h-[58%]'
+                  : isEfectivo
+                  ? 'w-full h-full'
+                  : 'w-full h-full p-1'
                 }`}
               onError={(e) => {
                 const target = e.target as HTMLImageElement;
-                if ((method.tipo === 'bolsillo' || method.tipo === 'efectivo') && !target.src.includes('bancow_icon.png')) {
+                if ((method.tipo === 'bolsillo' || method.tipo === 'microcredito') && !target.src.includes('bancow_icon.png')) {
                   target.src = '/bancow_icon.png';
+                } else if (isEfectivo && !target.src.includes('billete_icon.svg')) {
+                  target.src = '/billete_icon.svg';
                 } else {
                   setImgError(true);
                 }
               }}
             />
           ) : (
-            <div className="w-full h-full bg-[#eaecfb] text-[#2F399B] flex items-center justify-center">
-              <Icon name={method.tipo === 'efectivo' ? 'coins' : 'wallet'} size={24} stroke={2} />
+            <div className={`w-full h-full flex items-center justify-center ${
+              isEfectivo ? 'bg-[#ecfdf5] text-[#059669]' : 'bg-[#eaecfb] text-[#2F399B]'
+            }`}>
+              <Icon name={isEfectivo ? 'cash' : 'wallet'} size={24} stroke={2} />
             </div>
           )}
         </div>
@@ -72,6 +86,11 @@ export const PaymentMethodCard: React.FC<PaymentMethodCardProps> = ({
             <>
               <span className="text-slate-500 font-normal">Saldo</span>
               <span className="font-bold text-slate-900">{method.saldoDisponible}</span>
+            </>
+          ) : method.tipo === 'microcredito' ? (
+            <>
+              <span className="text-slate-500 font-normal">{method.cupoLabel || 'Cupo'}</span>
+              <span className="font-bold text-slate-900">{method.saldoDisponible || method.cupoDisponible || '$2,500,000.00'}</span>
             </>
           ) : (
             <span className="text-slate-500 font-normal">

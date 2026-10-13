@@ -81,14 +81,18 @@ export const PagarFacturaScreen: React.FC<PagarFacturaScreenProps> = ({
   // Al inscribir una nueva llave desde el modal
   const handleNuevaLlaveInscrita = (nueva: MedioDePago) => {
     setMediosDePago((prev) => {
-      const bolsillo = prev.find((m) => m.tipo === 'bolsillo');
+      const microcredito = prev.find((m) => m.tipo === 'microcredito');
+      const cuenta = prev.find((m) => m.tipo === 'bolsillo');
       const efectivo = prev.find((m) => m.tipo === 'efectivo');
-      const demas = prev.filter((m) => m !== bolsillo && m !== efectivo);
+      const demas = prev.filter(
+        (m) => m !== microcredito && m !== cuenta && m !== efectivo
+      );
       const resultado: MedioDePago[] = [];
-      if (bolsillo) resultado.push(bolsillo);
-      if (efectivo) resultado.push(efectivo);
+      if (microcredito) resultado.push(microcredito);
+      if (cuenta) resultado.push(cuenta);
       resultado.push(nueva);
       resultado.push(...demas);
+      if (efectivo) resultado.push(efectivo);
       return resultado;
     });
     setSelectedMethodId(nueva.id);

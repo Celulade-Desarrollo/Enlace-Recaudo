@@ -24,6 +24,7 @@ import {
   IconDotsVertical,
   IconAlertCircle,
   IconPencil,
+  IconCashBanknote,
   type TablerIcon
 } from '@tabler/icons-react';
 
@@ -36,6 +37,8 @@ export type IconName =
   | 'star'
   | 'receipt'
   | 'coins'
+  | 'cash'
+  | 'banknote'
   | 'arrow-left'
   | 'chevron-right'
   | 'check'
@@ -63,6 +66,8 @@ const iconMap: Record<IconName, TablerIcon> = {
   star: IconStar,
   receipt: IconReceipt,
   coins: IconCoins,
+  cash: IconCashBanknote,
+  banknote: IconCashBanknote,
   'arrow-left': IconArrowLeft,
   'chevron-right': IconChevronRight,
   check: IconCheck,

@@ -13,9 +13,11 @@ export interface MedioDePago {
   bancoId: string;
   nombre: string;
   icono: string;
-  tipo: 'llave' | 'bolsillo' | 'efectivo';
+  tipo: 'llave' | 'bolsillo' | 'efectivo' | 'microcredito';
   valorLlave?: string;
   saldoDisponible?: string;
+  cupoDisponible?: string;
+  cupoLabel?: string;
   tipoLlave?: TipoLlave;
   fechaInscripcion?: string;
   esPrincipal?: boolean;
@@ -76,20 +78,20 @@ const BANCOS_FALLBACK: Banco[] = [
 
 const INITIAL_MEDIOS_DE_PAGO: MedioDePago[] = [
   {
+    id: 'microcredito-bancow',
+    bancoId: 'bancow',
+    nombre: 'Microcrédito banco W',
+    icono: '/bancow_icon.png',
+    tipo: 'microcredito',
+    saldoDisponible: '$2,500,000.00'
+  },
+  {
     id: 'bolsillo-3',
     bancoId: 'bolsillo',
-    nombre: 'Saldo en mi bolsillo',
+    nombre: 'Saldo en mi cuenta banco W',
     icono: '/bancow_icon.png',
     tipo: 'bolsillo',
     saldoDisponible: '$157,433.58'
-  },
-  {
-    id: 'efectivo-bancow',
-    bancoId: 'efectivo',
-    nombre: 'Efectivo',
-    icono: '/bancow_icon.png',
-    tipo: 'efectivo',
-    descripcion: 'Pago directo en efectivo'
   },
   {
     id: 'nequi-1',
@@ -112,6 +114,14 @@ const INITIAL_MEDIOS_DE_PAGO: MedioDePago[] = [
     tipoLlave: 'documento',
     fechaInscripcion: '04 Feb 2025',
     esPrincipal: false
+  },
+  {
+    id: 'efectivo-bancow',
+    bancoId: 'efectivo',
+    nombre: 'Efectivo',
+    icono: '/billete_icon.svg',
+    tipo: 'efectivo',
+    descripcion: 'Pago directo en efectivo'
   }
 ];
 
@@ -125,7 +135,8 @@ const ICON_MAP: Record<string, string> = {
   nu: '/nubank_icon.png',
   bolsillo: '/bancow_icon.png',
   bancow: '/bancow_icon.png',
-  efectivo: '/bancow_icon.png'
+  microcredito: '/bancow_icon.png',
+  efectivo: '/billete_icon.svg'
 };
 
 // Deducir el tipo de llave según el valor ingresado
@@ -180,9 +191,16 @@ export const bancosService = {
           }
           if (m.tipo === 'bolsillo' || m.id === 'bolsillo-3' || m.bancoId === 'bolsillo') {
             updated.icono = '/bancow_icon.png';
+            if (updated.nombre.toLowerCase().includes('bolsillo')) {
+              updated.nombre = 'Saldo en mi cuenta banco W';
+            }
+          }
+          if (m.tipo === 'microcredito' || m.id === 'microcredito-bancow') {
+            updated.icono = '/bancow_icon.png';
+            updated.nombre = 'Microcrédito banco W';
           }
           if (m.tipo === 'efectivo' || m.id === 'efectivo-bancow' || m.bancoId === 'efectivo') {
-            updated.icono = '/bancow_icon.png';
+            updated.icono = '/billete_icon.svg';
           }
           if (m.tipo === 'llave' && !updated.tipoLlave && m.valorLlave) {
             updated.tipoLlave = inferirTipoLlave(m.valorLlave);
@@ -194,22 +212,63 @@ export const bancosService = {
       }
     }
 
-    // 1ra opción: Saldo en mi bolsillo
-    const bolsillo = lista.find(
-      (m) => m.tipo === 'bolsillo' || m.id === 'bolsillo-3' || m.nombre.toLowerCase().includes('bolsillo')
-    ) || INITIAL_MEDIOS_DE_PAGO[0];
+    // 1ra opción: Microcrédito banco W
+    let microcredito = lista.find(
+      (m) =>
+        m.tipo === 'microcredito' ||
+        m.id === 'microcredito-bancow' ||
+        m.nombre.toLowerCase().includes('microcredito') ||
+        m.nombre.toLowerCase().includes('microcrédito')
+    );
+    if (!microcredito) {
+      microcredito = INITIAL_MEDIOS_DE_PAGO[0];
+    } else {
+      microcredito = { ...microcredito, nombre: 'Microcrédito banco W', icono: '/bancow_icon.png' };
+    }
 
-    // 2da opción: Efectivo justo debajo con logo de Bancow
-    const efectivo = lista.find(
-      (m) => m.tipo === 'efectivo' || m.id === 'efectivo-bancow' || m.nombre.toLowerCase().includes('efectivo')
-    ) || INITIAL_MEDIOS_DE_PAGO[1];
+    // 2da opción: Saldo en mi cuenta banco W
+    let cuenta = lista.find(
+      (m) =>
+        m.tipo === 'bolsillo' ||
+        m.id === 'bolsillo-3' ||
+        m.bancoId === 'bolsillo' ||
+        m.nombre.toLowerCase().includes('cuenta') ||
+        m.nombre.toLowerCase().includes('bolsillo')
+    );
+    if (!cuenta) {
+      cuenta = INITIAL_MEDIOS_DE_PAGO[1];
+    } else {
+      cuenta = { ...cuenta, nombre: 'Saldo en mi cuenta banco W', icono: '/bancow_icon.png' };
+    }
 
-    // Llaves inscritas restantes
+    // Última opción: Efectivo
+    let efectivo = lista.find(
+      (m) =>
+        m.tipo === 'efectivo' ||
+        m.id === 'efectivo-bancow' ||
+        m.bancoId === 'efectivo' ||
+        m.nombre.toLowerCase().includes('efectivo')
+    );
+    if (!efectivo) {
+      efectivo = INITIAL_MEDIOS_DE_PAGO[4];
+    } else {
+      efectivo = { ...efectivo, icono: '/billete_icon.svg' };
+    }
+
+    // Llaves inscritas en el medio
     const demas = lista.filter(
-      (m) => m.id !== bolsillo.id && m.id !== efectivo.id && m.tipo !== 'bolsillo' && m.tipo !== 'efectivo'
+      (m) =>
+        m.id !== microcredito?.id &&
+        m.id !== cuenta?.id &&
+        m.id !== efectivo?.id &&
+        m.tipo !== 'microcredito' &&
+        m.tipo !== 'bolsillo' &&
+        m.tipo !== 'efectivo'
     );
 
-    return [bolsillo, efectivo, ...demas];
+    const ordered = [microcredito, cuenta, ...demas, efectivo];
+    localStorage.setItem('enlace_medios_pago', JSON.stringify(ordered));
+    return ordered;
   },
 
   /**
@@ -255,10 +314,13 @@ export const bancosService = {
       esPrincipal: existingKeys.length === 0 // Primera llave es la principal por defecto
     };
 
-    const bolsillo = current.find((m) => m.tipo === 'bolsillo') || INITIAL_MEDIOS_DE_PAGO[0];
-    const efectivo = current.find((m) => m.tipo === 'efectivo') || INITIAL_MEDIOS_DE_PAGO[1];
-    const demas = current.filter((m) => m.tipo !== 'bolsillo' && m.tipo !== 'efectivo');
-    const updated = [bolsillo, efectivo, nueva, ...demas];
+    const microcredito = current.find((m) => m.tipo === 'microcredito') || INITIAL_MEDIOS_DE_PAGO[0];
+    const cuenta = current.find((m) => m.tipo === 'bolsillo') || INITIAL_MEDIOS_DE_PAGO[1];
+    const efectivo = current.find((m) => m.tipo === 'efectivo') || INITIAL_MEDIOS_DE_PAGO[4];
+    const demas = current.filter(
+      (m) => m.tipo !== 'microcredito' && m.tipo !== 'bolsillo' && m.tipo !== 'efectivo'
+    );
+    const updated = [microcredito, cuenta, nueva, ...demas, efectivo];
     await this.saveMediosDePago(updated);
     return nueva;
   },
