@@ -1,0 +1,164 @@
+{
+  "apiTransportistaPagoFacturas": {
+    "version": "2.0.0",
+    "enfoque": "Pago de facturas Alpina con datos Amovil + Backend Simulado de Recaudo",
+    "ambientes": {
+      "amovilGatewayQA": "https://qa-client-gateway-general.amovil.com.co:42281",
+      "enlaceWebapp": "https://app.enlacecrm.com:8081",
+      "backendSimuladoRecaudo": "https://enlace-crm.com:3000/backend"
+    }
+  },
+  "pasosFlujo": {
+    "paso0_deepLinkMovil": {
+      "descripcion": "Invocación inicial desde la app móvil del transportista",
+      "urlEjemplo": "https://app.enlacecrm.com:8081/?nbAgenteComercial=114920&nbCliente=8100030469&token=1234567890abcdef",
+      "parametrosURL": {
+        "nbAgenteComercial": "114920",
+        "nbCliente": "8100030469",
+        "token": "1234567890abcdef"
+      }
+    },
+    "paso1_autenticacionAmovil": {
+      "metodo": "POST",
+      "url": "https://qa-client-gateway-general.amovil.com.co:42281/auth",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "request": {
+        "username": "alpina",
+        "password": "en_documento*"
+      },
+      "response200": {
+        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+      }
+    },
+    "paso2_consultaClienteAmovil": {
+      "metodo": "POST",
+      "url": "https://qa-client-gateway-general.amovil.com.co:42281/clients/bancoW",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer <token>"
+      },
+      "request": {
+        "nbAgenteComercial": "114920",
+        "nbCliente": "102805"
+      },
+      "response200": {
+        "data": [
+          {
+            "clienteId": "102805",
+            "documento": "1100975561",
+            "nombre": "LUIS DARIO",
+            "apellido": "SANCHEZ FUENTES",
+            "departamento": "SANTANDER",
+            "ciudad": "BARRANCABERMEJA"
+          }
+        ],
+        "total": 1,
+        "totalPages": 1,
+        "currentPage": 1
+      }
+    },
+    "paso3_consultaFacturasVigentesAmovil": {
+      "metodo": "POST",
+      "url": "https://qa-client-gateway-general.amovil.com.co:42281/historical/bancoW",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer <token>"
+      },
+      "request": {
+        "nbAgenteComercial": "114920",
+        "nbCliente": "8100030469"
+      },
+      "response200": {
+        "data": [
+          {
+            "clienteId": "8100030469",
+            "documento": "28**97",
+            "factura": "1297660",
+            "valor": 28010
+          },
+          {
+            "clienteId": "8100030469",
+            "documento": "28**97",
+            "factura": "1301373",
+            "valor": 136804
+          }
+        ],
+        "total": 2,
+        "totalPages": 1,
+        "currentPage": 1
+      }
+    },
+    "paso5_procesarPagoBackendSimulado": {
+      "descripcion": "El transportista presiona Pagar Factura. El backend calcula IVA/Subtotal y simula aprobación",
+      "metodo": "POST",
+      "url": "https://enlace-crm.com:3000/backend/api/pagos",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "request": {
+        "idFactura": "1301373",
+        "nbAgenteComercial": "114920",
+        "nbCliente": "8100030469",
+        "medioPago": "Llave Bre-B (Nequi)",
+        "tipoPago": "total",
+        "valor": 136804,
+        "pagadorNombre": "LUIS DARIO SANCHEZ FUENTES",
+        "pagadorDocumento": "1100975561"
+      },
+      "response200Simulada": {
+        "success": true,
+        "idTransaccion": "TXN-ALP-1301373-8942",
+        "idFactura": "1301373",
+        "valor": "$136.804",
+        "subtotal": "$114.961",
+        "iva": "$21.843",
+        "empresa": "Alpina Productos Alimenticios S.A.",
+        "nitEmpresa": "NIT 860.025.900-1",
+        "pagador": "LUIS DARIO SANCHEZ FUENTES",
+        "nitPagador": "CC 1.100.975.561",
+        "medioPago": "Llave Bre-B (Nequi)",
+        "fechaHora": "13 Ago 2026 15:10",
+        "estado": "APROBADA",
+        "referenciaPago": "REF-ALP-1301373",
+        "descripcion": "Entrega y pago de pedido lácteos Alpina",
+        "urlComprobanteQR": "https://app.enlacecrm.com:8081/factura/1301373"
+      }
+    },
+    "paso6_consultarComprobanteQR": {
+      "metodo": "GET",
+      "url": "https://enlace-crm.com:3000/backend/api/facturas/1301373",
+      "response200": {
+        "idFactura": "1301373",
+        "valor": "$136.804",
+        "subtotal": "$114.961",
+        "iva": "$21.843",
+        "empresa": "Alpina Productos Alimenticios S.A.",
+        "nitEmpresa": "NIT 860.025.900-1",
+        "pagador": "LUIS DARIO SANCHEZ FUENTES",
+        "nitPagador": "CC 1.100.975.561",
+        "medioPago": "Llave Bre-B (Nequi)",
+        "fechaHora": "13 Ago 2026 15:10",
+        "estado": "APROBADA",
+        "referenciaPago": "REF-ALP-1301373",
+        "descripcion": "Entrega y pago de pedido lácteos Alpina"
+      }
+    },
+    "paso7_enviarComprobanteWhatsapp": {
+      "metodo": "POST",
+      "url": "https://enlace-crm.com:3000/backend/whatsapp/send-message",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "request": {
+        "number": "573113877395",
+        "message": "LUIS DARIO SANCHEZ FUENTES envío un pago de la factura 1301373 por el valor de $ 136.804 el día 13/08/2026 a la hora 3:10pm. Comprobante: https://app.enlacecrm.com:8081/factura/1301373"
+      },
+      "response200": {
+        "success": true,
+        "message": "Mensaje enviado exitosamente"
+      }
+    }
+  }
+}
