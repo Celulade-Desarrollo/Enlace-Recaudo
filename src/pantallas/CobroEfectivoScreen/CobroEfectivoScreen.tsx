@@ -1,5 +1,4 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { MobileStatusBar } from '../../components/atoms/MobileStatusBar/MobileStatusBar';
 import { MobileHomeBar } from '../../components/atoms/MobileHomeBar/MobileHomeBar';
 import { Icon } from '../../components/atoms/Icon/Icon';
 import type { PrefacturaCliente } from '../../services/transportistaService';
