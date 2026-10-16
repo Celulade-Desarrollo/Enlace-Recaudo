@@ -6,11 +6,13 @@ import type { PrefacturaCliente } from '../../services/transportistaService';
 import { obtenerPartesColombia } from '../../types/transaccion';
 
 export interface DetallesPagoRealizado {
-  tipo: 'digital_completo' | 'parcial' | 'efectivo';
+  tipo: 'digital_completo' | 'parcial' | 'efectivo' | 'dos_qr';
   montoDigital?: number;
   montoEfectivo?: number;
   efectivoRecibido?: number;
   cambio?: number;
+  montoQr1?: number;
+  montoQr2?: number;
 }
 
 interface TransportistaPagoRecibidoScreenProps {
@@ -117,13 +119,32 @@ export const TransportistaPagoRecibidoScreen: React.FC<TransportistaPagoRecibido
           <div className="flex justify-between py-2 border-b border-dashed border-slate-200">
             <span className="font-bold text-slate-900 text-left">Medio de Pago</span>
             <span className="text-slate-800 font-medium text-right">
-              {detallesPago?.tipo === 'parcial'
+              {detallesPago?.tipo === 'dos_qr'
+                ? 'Pago parcial por medios digitales'
+                : detallesPago?.tipo === 'parcial'
                 ? 'Mixto (QR Bre-B + Efectivo)'
                 : detallesPago?.tipo === 'efectivo'
                 ? 'Efectivo'
                 : prefactura.medioPago}
             </span>
           </div>
+
+          {detallesPago?.tipo === 'dos_qr' && (
+            <>
+              <div className="flex justify-between py-2 border-b border-dashed border-slate-200">
+                <span className="font-bold text-indigo-900 text-left">1er Cobro QR Bre-B</span>
+                <span className="text-indigo-900 font-bold text-right">
+                  ${detallesPago.montoQr1?.toLocaleString('es-CO')}
+                </span>
+              </div>
+              <div className="flex justify-between py-2 border-b border-dashed border-slate-200">
+                <span className="font-bold text-indigo-900 text-left">2do Cobro QR Bre-B</span>
+                <span className="text-indigo-900 font-bold text-right">
+                  ${detallesPago.montoQr2?.toLocaleString('es-CO')}
+                </span>
+              </div>
+            </>
+          )}
 
           {detallesPago?.tipo === 'parcial' && (
             <>

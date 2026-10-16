@@ -9,6 +9,9 @@ interface CobroQrBrebScreenProps {
   prefactura: PrefacturaCliente;
   montoCobro?: number;
   esParcial?: boolean;
+  esDosQr?: boolean;
+  pasoDosQr?: 1 | 2;
+  montoOtroQr?: number;
   restanteEfectivo?: number;
   onBack: () => void;
   onConfirmarPago: () => void;
@@ -20,6 +23,9 @@ export const CobroQrBrebScreen: React.FC<CobroQrBrebScreenProps> = ({
   prefactura,
   montoCobro,
   esParcial = false,
+  esDosQr = false,
+  pasoDosQr = 1,
+  montoOtroQr = 0,
   restanteEfectivo = 0,
   onBack,
   onConfirmarPago,
@@ -68,11 +74,15 @@ export const CobroQrBrebScreen: React.FC<CobroQrBrebScreenProps> = ({
       <main className="flex-1 flex flex-col items-center justify-between px-6 pt-5 pb-4 text-center">
         {/* Encabezado con monto */}
         <div className="flex flex-col items-center">
-          {esParcial && (
+          {esDosQr ? (
+            <span className="text-[12px] font-semibold text-[#8e8e93] uppercase tracking-wider mb-1">
+              {pasoDosQr === 1 ? 'Paso 1 · Primer QR' : 'Paso 2 · Segundo QR'}
+            </span>
+          ) : esParcial ? (
             <span className="text-[12px] font-semibold text-[#8e8e93] uppercase tracking-wider mb-1">
               Paso 1 · Cobro digital
             </span>
-          )}
+          ) : null}
 
           <div className="text-[34px] sm:text-[38px] font-black text-slate-900 font-sans tracking-tight leading-none mt-1">
             {valorMostrado}
@@ -82,11 +92,19 @@ export const CobroQrBrebScreen: React.FC<CobroQrBrebScreenProps> = ({
             {prefactura.pagador} · #{prefactura.numeroPrefactura}
           </p>
 
-          {esParcial && (
+          {esDosQr ? (
+            <p className="text-[13px] text-slate-500 font-medium mt-1.5">
+              {pasoDosQr === 1 ? (
+                <>Restante en 2do QR: <strong className="font-black text-slate-900 font-sans">${montoOtroQr.toLocaleString('es-CO')}</strong></>
+              ) : (
+                <>1er QR cobrado: <strong className="font-black text-slate-900 font-sans">${montoOtroQr.toLocaleString('es-CO')}</strong></>
+              )}
+            </p>
+          ) : esParcial ? (
             <p className="text-[13px] text-slate-500 font-medium mt-1.5">
               Restante en efectivo: <strong className="font-black text-slate-900 font-sans">${restanteEfectivo.toLocaleString('es-CO')}</strong>
             </p>
-          )}
+          ) : null}
         </div>
 
         {/* Espacio para QR Bre-B */}
@@ -136,6 +154,12 @@ export const CobroQrBrebScreen: React.FC<CobroQrBrebScreenProps> = ({
           >
             {procesando ? (
               <span>Confirmando...</span>
+            ) : esDosQr ? (
+              <span>
+                {pasoDosQr === 1
+                  ? 'Confirmar y generar 2do QR'
+                  : 'Confirmar pago recibido'}
+              </span>
             ) : (
               <span>
                 {esParcial ? 'Confirmar y cobrar efectivo' : 'Confirmar pago recibido'}

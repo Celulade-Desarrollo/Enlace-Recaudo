@@ -11,6 +11,7 @@ interface GenerarFacturaScreenProps {
   prefactura: PrefacturaCliente;
   onBack: () => void;
   onPagoCompletoDigital: () => void;
+  onPagoDosQr: (montoQr1: number, montoQr2: number) => void;
   onPagoParcial: (montoDigital: number, restanteEfectivo: number) => void;
   onPagoEfectivo: () => void;
   onGenerarQr?: () => void;
@@ -21,6 +22,7 @@ export const GenerarFacturaScreen: React.FC<GenerarFacturaScreenProps> = ({
   prefactura,
   onBack,
   onPagoCompletoDigital,
+  onPagoDosQr,
   onPagoParcial,
   onPagoEfectivo,
   onGenerarQr,
@@ -144,6 +146,10 @@ export const GenerarFacturaScreen: React.FC<GenerarFacturaScreenProps> = ({
           } else if (onGenerarQr) {
             onGenerarQr();
           }
+        }}
+        onSelectPagoDosQr={(montoQr1, montoQr2) => {
+          setIsModalOpcionesOpen(false);
+          onPagoDosQr(montoQr1, montoQr2);
         }}
         onSelectPagoParcial={(montoDigital, restanteEfectivo) => {
           setIsModalOpcionesOpen(false);
