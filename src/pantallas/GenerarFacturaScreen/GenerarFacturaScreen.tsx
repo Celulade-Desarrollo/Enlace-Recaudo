@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { AnimatePresence } from 'motion/react';
-import { MobileStatusBar } from '../../components/atoms/MobileStatusBar/MobileStatusBar';
 import { MobileHomeBar } from '../../components/atoms/MobileHomeBar/MobileHomeBar';
 import { Icon } from '../../components/atoms/Icon/Icon';
 import { ModalOpcionPago } from '../../components/molecules/ModalOpcionPago/ModalOpcionPago';
@@ -78,7 +77,6 @@ export function GenerarFacturaScreen({
   return (
     <div className={`prefactura-screen ${className}`}>
       <header className="prefactura-header">
-        <MobileStatusBar theme="light" time="9:30" />
         <div className="prefactura-header-titulo">
           <button type="button" className="prefactura-back" aria-label="Volver a facturas" onClick={onBack}><Icon name="arrow-left" size={20} /></button>
           <h1>Generar Factura</h1><span aria-hidden="true" />

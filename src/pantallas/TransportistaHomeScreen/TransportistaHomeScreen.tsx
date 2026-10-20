@@ -1,6 +1,5 @@
 import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence, type Variants } from 'motion/react';
-import { MobileStatusBar } from '../../components/atoms/MobileStatusBar/MobileStatusBar';
 import { EnlaceLogo } from '../../components/atoms/Logo/EnlaceLogo';
 import { Avatar } from '../../components/atoms/Avatar/Avatar';
 import { SearchBar } from '../../components/molecules/SearchBar/SearchBar';
@@ -76,15 +75,12 @@ export const TransportistaHomeScreen: React.FC<TransportistaHomeScreenProps> = (
         <div className="w-full flex flex-col">
           {/* Header Azul con Total a Recaudar Hoy */}
           <div
-            className="w-full bg-[#2F3CB3] text-white pt-1 pb-7 px-5 select-none relative shadow-xs"
+            className="w-full bg-[#2F3CB3] text-white pt-3 pb-7 px-5 select-none relative shadow-xs"
             style={{
               borderBottomLeftRadius: '50% 24px',
               borderBottomRightRadius: '50% 24px'
             }}
           >
-            {/* Barra de estado móvil nativa */}
-            <MobileStatusBar theme="light" time="9:30" />
-
             {/* Top Bar: Logo + Avatar LM */}
             <div className="flex items-center justify-between pt-1.5 pb-2">
               <EnlaceLogo />
@@ -187,8 +183,7 @@ export const TransportistaHomeScreen: React.FC<TransportistaHomeScreenProps> = (
       {/* ============================================================== */}
       {activeNavTab === 'movimientos' && (
         <div className="w-full flex flex-col">
-          <div className="w-full bg-[#2F3CB3] text-white pt-1 pb-4 px-5 select-none shadow-xs">
-            <MobileStatusBar theme="light" time="9:30" />
+          <div className="w-full bg-[#2F3CB3] text-white pt-3 pb-4 px-5 select-none shadow-xs">
             <div className="pt-2 pb-1 text-center">
               <h1 className="text-lg font-bold text-white tracking-tight">
                 Mis Movimientos
@@ -223,8 +218,7 @@ export const TransportistaHomeScreen: React.FC<TransportistaHomeScreenProps> = (
       {/* ============================================================== */}
       {activeNavTab === 'notificaciones' && (
         <div className="w-full flex flex-col">
-          <div className="w-full bg-[#2F3CB3] text-white pt-1 pb-4 px-5 select-none shadow-xs">
-            <MobileStatusBar theme="light" time="9:30" />
+          <div className="w-full bg-[#2F3CB3] text-white pt-3 pb-4 px-5 select-none shadow-xs">
             <div className="pt-2 pb-1 text-center">
               <h1 className="text-lg font-bold text-white tracking-tight">
                 Notificaciones

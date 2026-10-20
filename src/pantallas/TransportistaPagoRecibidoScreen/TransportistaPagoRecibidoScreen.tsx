@@ -1,6 +1,5 @@
 import React from 'react';
 import { motion } from 'motion/react';
-import { MobileStatusBar } from '../../components/atoms/MobileStatusBar/MobileStatusBar';
 import { MobileHomeBar } from '../../components/atoms/MobileHomeBar/MobileHomeBar';
 import type { PrefacturaCliente } from '../../services/transportistaService';
 import { formatearPesos } from '../../services/productosService';
@@ -37,9 +36,7 @@ export const TransportistaPagoRecibidoScreen: React.FC<TransportistaPagoRecibido
 
   return (
     <div className={`w-full flex-1 flex flex-col bg-white relative pb-3 font-sans ${className}`}>
-      {/* Header con título Pago Recibido + Status Bar */}
-      <header className="w-full bg-[#2F3CB3] text-white pt-1 px-4 pb-4.5 flex-shrink-0 text-center select-none shadow-xs">
-        <MobileStatusBar theme="light" time="9:30" />
+      <header className="w-full bg-[#2F3CB3] text-white pt-3 px-4 pb-4.5 flex-shrink-0 text-center select-none shadow-xs">
         <h1 className="text-[17px] font-bold text-white tracking-tight pt-1">
           Pago Recibido
         </h1>

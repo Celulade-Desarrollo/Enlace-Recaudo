@@ -1,6 +1,5 @@
 import React from 'react';
 import { motion, type Variants } from 'motion/react';
-import { MobileStatusBar } from '../../components/atoms/MobileStatusBar/MobileStatusBar';
 import { MobileHomeBar } from '../../components/atoms/MobileHomeBar/MobileHomeBar';
 import { Icon } from '../../components/atoms/Icon/Icon';
 import { PrefacturaCard } from '../../components/molecules/PrefacturaCard/PrefacturaCard';
@@ -46,10 +45,7 @@ export const FacturasARecaudarScreen: React.FC<FacturasARecaudarScreenProps> = (
 
   return (
     <div className={`w-full flex-1 flex flex-col bg-white relative pb-4 ${className}`}>
-      {/* Top Header con Status Bar */}
-      <header className="w-full bg-[#2F3CB3] text-white pt-1 pb-3 px-4 select-none sticky top-0 z-20 shadow-xs">
-        <MobileStatusBar theme="light" time="9:30" />
-
+      <header className="w-full bg-[#2F3CB3] text-white pt-3 pb-3 px-4 select-none sticky top-0 z-20 shadow-xs">
         <div className="flex items-center justify-between pt-1">
           <button
             type="button"
