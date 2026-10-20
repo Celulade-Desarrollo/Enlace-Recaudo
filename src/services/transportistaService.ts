@@ -1,4 +1,6 @@
 import { obtenerFechaHoraActual, obtenerPartesColombia } from '../types/transaccion';
+import type { ProductoFactura } from '../types/producto';
+import { prepararPrefactura, totalProductos, formatearPesos } from './productosService';
 
 export interface TiendaRuta {
   id: string;
@@ -23,6 +25,10 @@ export interface PrefacturaCliente {
   medioPago: string;
   fechaHora: string;
   refPago: string;
+  productos?: ProductoFactura[];
+  productosOriginales?: ProductoFactura[];
+  valorOriginalNum?: number;
+  esFacturaModificada?: boolean;
 }
 
 const STORAGE_RUTAS_KEY = 'enlace_transportista_rutas';
@@ -249,14 +255,14 @@ export const transportistaService = {
       const data = localStorage.getItem(STORAGE_PREFACTURAS_KEY);
       if (data) {
         const stored = JSON.parse(data);
-        if (stored[tiendaId]) return stored[tiendaId];
+        if (stored[tiendaId]) return stored[tiendaId].map(prepararPrefactura);
       }
     } catch {
       // fallback
     }
 
     if (INITIAL_PREFACTURAS[tiendaId]) {
-      return INITIAL_PREFACTURAS[tiendaId];
+      return INITIAL_PREFACTURAS[tiendaId].map(prepararPrefactura);
     }
 
     // Si es otra tienda, generamos prefacturas coherentes
@@ -274,7 +280,40 @@ export const transportistaService = {
         fechaHora: obtenerFechaHoraActual(),
         refPago: 'IJH9947583'
       }
-    ];
+    ].map(prepararPrefactura);
+  },
+
+  guardarPrefactura(tiendaId: string, prefactura: PrefacturaCliente): void {
+    const anteriores = this.getPrefacturasByTienda(tiendaId);
+    const anterior = anteriores.find((item) => item.id === prefactura.id);
+    if (!anterior) throw new Error('No se encontró la prefactura seleccionada.');
+    if (!Number.isSafeInteger(prefactura.saldoTotalNum) || prefactura.saldoTotalNum <= 0 || (prefactura.productos?.length
+      && totalProductos(prefactura.productos) !== prefactura.saldoTotalNum)) {
+      throw new Error('Revisa los productos y el total de la factura.');
+    }
+
+    let guardadas: Record<string, PrefacturaCliente[]> = {};
+    const raw = localStorage.getItem(STORAGE_PREFACTURAS_KEY);
+    if (raw) {
+      try { guardadas = JSON.parse(raw); } catch { /* Recuperar catálogo local dañado. */ }
+    }
+    const nuevas = anteriores.map((item) => item.id === prefactura.id ? prefactura : item);
+    const rutas = this.getTiendasRuta().map((tienda) => {
+      if (tienda.id !== tiendaId) return tienda;
+      const total = tienda.saldoTotalNum - anterior.saldoTotalNum + prefactura.saldoTotalNum;
+      return { ...tienda, saldoTotalNum: total, saldoTotal: formatearPesos(total) };
+    });
+
+    // El guardado se hace al generar, nunca durante la edición de un borrador.
+    const rutasPrevias = localStorage.getItem(STORAGE_RUTAS_KEY);
+    try {
+      localStorage.setItem(STORAGE_RUTAS_KEY, JSON.stringify(rutas));
+      localStorage.setItem(STORAGE_PREFACTURAS_KEY, JSON.stringify({ ...guardadas, [tiendaId]: nuevas }));
+    } catch (error) {
+      if (rutasPrevias === null) localStorage.removeItem(STORAGE_RUTAS_KEY);
+      else localStorage.setItem(STORAGE_RUTAS_KEY, rutasPrevias);
+      throw error;
+    }
   },
 
   getPrefacturaById(tiendaId: string, prefacturaIdOrNum: string): PrefacturaCliente | undefined {

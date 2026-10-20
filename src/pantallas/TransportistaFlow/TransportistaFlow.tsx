@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { AnimatePresence, motion } from 'motion/react';
+import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import { TransportistaHomeScreen } from '../TransportistaHomeScreen/TransportistaHomeScreen';
 import { FacturasARecaudarScreen } from '../FacturasARecaudarScreen/FacturasARecaudarScreen';
 import { GenerarFacturaScreen } from '../GenerarFacturaScreen/GenerarFacturaScreen';
@@ -25,6 +25,7 @@ type TransportistaPaso =
   | 'recibido';
 
 export const TransportistaFlow: React.FC = () => {
+  const reducirMovimiento = useReducedMotion();
   const [paso, setPaso] = useState<TransportistaPaso>('home');
   const [tiendaSeleccionada, setTiendaSeleccionada] = useState<TiendaRuta | null>(null);
   const [prefacturaSeleccionada, setPrefacturaSeleccionada] = useState<PrefacturaCliente | null>(null);
@@ -70,6 +71,7 @@ export const TransportistaFlow: React.FC = () => {
 
   // 2. Al seleccionar una prefactura a recaudar
   const handleSelectPrefactura = (prefactura: PrefacturaCliente) => {
+    window.scrollTo(0, 0);
     setPrefacturaSeleccionada(prefactura);
     setPagoInfo(null);
     setEsPagoParcial(false);
@@ -271,14 +273,20 @@ export const TransportistaFlow: React.FC = () => {
           {paso === 'generar' && prefacturaSeleccionada && (
             <motion.div
               key="flow-generar"
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              transition={{ duration: 0.2, ease: [0.25, 1, 0.5, 1] }}
+              initial={reducirMovimiento ? { opacity: 0 } : { opacity: 1, y: '100%' }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0 }}
+              transition={reducirMovimiento ? { duration: 0.12 } : { type: 'spring', bounce: 0, duration: 0.35 }}
               className="w-full flex-1 flex flex-col"
             >
               <GenerarFacturaScreen
                 prefactura={prefacturaSeleccionada}
+                onPrefacturaChange={setPrefacturaSeleccionada}
+                onGuardarFactura={(prefactura) => {
+                  if (!tiendaSeleccionada) throw new Error('Selecciona una tienda.');
+                  transportistaService.guardarPrefactura(tiendaSeleccionada.id, prefactura);
+                  setTiendaSeleccionada(transportistaService.getTiendaById(tiendaSeleccionada.id) ?? tiendaSeleccionada);
+                }}
                 onBack={() => handleBack('facturas')}
                 onPagoCompletoDigital={handlePagoCompletoDigital}
                 onPagoDosQr={handlePagoDosQr}

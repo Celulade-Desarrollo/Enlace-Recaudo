@@ -3,6 +3,7 @@ import { motion } from 'motion/react';
 import { MobileStatusBar } from '../../components/atoms/MobileStatusBar/MobileStatusBar';
 import { MobileHomeBar } from '../../components/atoms/MobileHomeBar/MobileHomeBar';
 import type { PrefacturaCliente } from '../../services/transportistaService';
+import { formatearPesos } from '../../services/productosService';
 import { obtenerPartesColombia } from '../../types/transaccion';
 
 export interface DetallesPagoRealizado {
@@ -31,6 +32,8 @@ export const TransportistaPagoRecibidoScreen: React.FC<TransportistaPagoRecibido
   // Fecha y hora oficial en vivo de Colombia
   const partesCol = obtenerPartesColombia(new Date());
   const fechaHoraActual = `${partesCol.dia} ${partesCol.mesTexto} ${partesCol.anio} ${partesCol.horaFormateada}`;
+  const valorOriginal = prefactura.valorOriginalNum;
+  const mostrarComparacion = prefactura.esFacturaModificada && valorOriginal !== undefined;
 
   return (
     <div className={`w-full flex-1 flex flex-col bg-white relative pb-3 font-sans ${className}`}>
@@ -87,8 +90,13 @@ export const TransportistaPagoRecibidoScreen: React.FC<TransportistaPagoRecibido
             Transacción Aprobada
           </h2>
 
+          {mostrarComparacion && (
+            <div className="flex items-baseline gap-2 text-xs text-slate-500 mb-2 tabular-nums">
+              <span>Valor original</span><s>{formatearPesos(valorOriginal)}</s>
+            </div>
+          )}
           <span className="text-xs text-slate-500 font-medium">
-            Valor
+            {mostrarComparacion ? 'Valor editado' : 'Valor'}
           </span>
           <div className="text-[32px] sm:text-[36px] font-black text-slate-950 tracking-tight leading-none mt-1 mb-2">
             {prefactura.saldoTotal}

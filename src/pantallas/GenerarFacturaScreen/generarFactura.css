@@ -1,0 +1,107 @@
+.prefactura-screen {
+  --prefactura-azul: #363cb1;
+  --prefactura-accion: #4534bd;
+  --prefactura-tinta: #191919;
+  --prefactura-secundario: #60606a;
+  --prefactura-linea: #ededf2;
+  width: 100%; height: 100dvh; min-height: 0; flex: none;
+  display: flex; flex-direction: column;
+  background: white; color: var(--prefactura-tinta);
+}
+.prefactura-header { background: var(--prefactura-azul); color: white; padding: 0 12px 6px; flex-shrink: 0; }
+.prefactura-header-titulo { display: grid; grid-template-columns: 44px 1fr 44px; align-items: center; }
+.prefactura-header h1 { margin: 0; text-align: center; font-size: 17px; font-weight: 700; }
+.prefactura-back { width: 44px; height: 44px; display: grid; place-items: center; border-radius: 50%; cursor: pointer; }
+.prefactura-back:active { background: #ffffff20; }
+.prefactura-detalle { flex: 1; min-height: 0; display: flex; flex-direction: column; padding: 22px 20px 4px; }
+.prefactura-cliente { display: flex; align-items: center; gap: 12px; padding-bottom: 22px; flex-shrink: 0; }
+.prefactura-tienda-icon { display: grid; place-items: center; width: 46px; height: 46px; flex-shrink: 0; border-radius: 50%; color: #1b2075; background: #eeecff; }
+.prefactura-cliente h2 { font-size: 14px; font-weight: 700; margin: 0 0 3px; }
+.prefactura-cliente p { color: var(--prefactura-secundario); font-size: 12px; margin: 0; }
+.prefactura-cliente p span { color: var(--prefactura-tinta); margin-left: 8px; }
+.prefactura-seccion-titulo h2 { color: #1b2075; font-size: 16px; font-weight: 700; margin: 0 0 5px; }
+.prefactura-seccion-titulo p { margin: 0; font-size: 12px; color: var(--prefactura-secundario); }
+.prefactura-productos { margin-top: 12px; min-height: 0; flex: 1; overflow-y: auto; overscroll-behavior: contain; }
+.prefactura-producto { display: flex; width: 100%; align-items: center; gap: 10px; min-height: 82px; padding: 12px 0; border-bottom: 1px solid var(--prefactura-linea); text-align: left; cursor: pointer; transition: background 120ms ease; border-radius: 4px; }
+.prefactura-producto:hover, .prefactura-producto:active { background: #f7f7fc; }
+.prefactura-producto-imagen { width: 52px; height: 54px; object-fit: contain; flex-shrink: 0; }
+.prefactura-producto-info { display: flex; flex: 1; min-width: 0; flex-direction: column; gap: 5px; }
+.prefactura-producto-nombre { font-size: 13px; line-height: 1.4; font-weight: 650; }
+.prefactura-producto-presentacion { font-size: 11.5px; line-height: 1.5; color: var(--prefactura-secundario); }
+.prefactura-producto-importe { display: flex; flex-direction: column; gap: 4px; flex-shrink: 0; text-align: right; font-variant-numeric: tabular-nums; }
+.prefactura-producto-importe > span { color: var(--prefactura-secundario); font-size: 12px; }
+.prefactura-producto-importe strong { font-size: 16px; font-weight: 750; }
+.prefactura-resumen { flex-shrink: 0; font-variant-numeric: tabular-nums; }
+.prefactura-valor-original { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; padding-top: 12px; color: var(--prefactura-secundario); font-size: 13px; }
+.prefactura-valor-original + .prefactura-total { padding-top: 6px; color: #211977; }
+.prefactura-total { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; padding: 16px 0; flex-shrink: 0; font-size: 18px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.prefactura-total strong { font-size: 21px; }
+.prefactura-footer { margin-top: auto; padding: 8px 0 6px; flex-shrink: 0; }
+.prefactura-acciones { display: flex; gap: 12px; width: 100%; }
+.prefactura-button { flex: 1; min-width: 0; min-height: 46px; padding: 10px 12px; border: 1px solid #5144ca; border-radius: 999px; font-size: 13px; font-weight: 600; cursor: pointer; touch-action: manipulation; transition: background 120ms ease, opacity 120ms ease; }
+.prefactura-button.primario { background: #4534bd; color: white; }
+.prefactura-button.primario:hover { background: #3626a2; }
+.prefactura-button.secundario { background: white; color: #211977; }
+.prefactura-button.secundario:hover { background: #f5f3ff; }
+.prefactura-button:active { opacity: .8; }
+.prefactura-button:disabled { opacity: .4; cursor: not-allowed; }
+.prefactura-vacia { min-height: 200px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; text-align: center; color: #60606a; font-size: 14px; padding: 24px; }
+.prefactura-vacia span { font-size: 12px; }
+.prefactura-deshacer { display: flex; align-items: center; justify-content: space-between; background: #f3f2fa; padding: 4px 12px; margin-top: 12px; border-radius: 10px; font-size: 13px; }
+.prefactura-deshacer button { min-height: 44px; font-weight: 700; color: #34229e; padding: 0 8px; cursor: pointer; }
+.editar-producto-sheet {
+  position: fixed; inset: auto 0 0; margin: 0 auto; padding: 0;
+  width: min(100%, 430px); max-width: 430px;
+  max-height: calc(100dvh - 20px); overflow-y: auto; overscroll-behavior: contain;
+  border: 0; border-radius: 22px 22px 0 0;
+  color: #191919; background: white;
+  box-shadow: 0 -10px 48px #13113b18; font-family: inherit;
+}
+.editar-producto-sheet::backdrop { background: #16152a66; backdrop-filter: blur(2px); }
+.editar-producto-contenido { padding: 10px 22px max(24px, env(safe-area-inset-bottom)); }
+.sheet-indicador { width: 34px; height: 4px; margin: 0 auto 6px; border-radius: 4px; background: #d4d3db; }
+.editar-producto-cabecera { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
+.editar-producto-cabecera h2 { font-size: 17px; font-weight: 700; margin: 0; }
+.producto-icon-button { display: grid; place-items: center; width: 44px; height: 44px; flex-shrink: 0; border-radius: 50%; color: #60606a; cursor: pointer; }
+.producto-icon-button:hover, .producto-icon-button:active { background: #f3f2f7; }
+.editar-producto-fila { display: flex; align-items: center; gap: 12px; padding-bottom: 22px; }
+.editar-producto-imagen { width: 64px; height: 78px; object-fit: contain; flex-shrink: 0; }
+.editar-producto-datos { flex: 1; min-width: 0; }
+.editar-producto-descripcion { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin-bottom: 12px; }
+.editar-producto-descripcion h3 { font-size: 13px; font-weight: 650; line-height: 1.5; margin: 0; }
+.editar-producto-descripcion > span { font-size: 12px; color: #60606a; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.editar-producto-controles { display: flex; align-items: center; gap: 8px; }
+.cantidad-button { width: 44px; height: 44px; border-radius: 50%; background: #4534bd; color: white; display: grid; place-items: center; flex-shrink: 0; cursor: pointer; touch-action: manipulation; }
+.cantidad-button:hover, .cantidad-button:active { background: #302193; }
+.cantidad-button:disabled { background: #e8e6f6; color: #9c96b8; cursor: not-allowed; }
+.editar-producto-controles input { width: 60px; height: 42px; min-width: 0; border: 1px solid #e1e0e8; border-radius: 5px; background: white; text-align: center; font-size: 16px; font-variant-numeric: tabular-nums; }
+.editar-producto-controles input[aria-invalid='true'] { border-color: #b42318; }
+.eliminar-producto { margin-left: auto; border-radius: 8px; }
+.eliminar-producto:hover { color: #b42318; background: #fff1f0; }
+.editar-producto-subtotal { display: flex; justify-content: space-between; padding: 18px 0 25px; border-top: 1px solid #ededf2; font-size: 18px; font-weight: 650; font-variant-numeric: tabular-nums; }
+.editar-producto-subtotal strong { font-weight: 750; }
+.producto-error { color: #b42318; font-size: 12px; line-height: 1.5; padding-bottom: 12px; }
+.prefactura-screen button:focus-visible, .editar-producto-sheet button:focus-visible, .editar-producto-sheet input:focus-visible { outline: 3px solid #8b7bea; outline-offset: 3px; }
+@media (min-width: 640px) {
+  .prefactura-screen { height: 850px; }
+  .editar-producto-sheet { bottom: 12px; border-radius: 22px; }
+}
+@media (max-width: 359px) {
+  .prefactura-detalle { padding-left: 14px; padding-right: 14px; }
+  .prefactura-producto { gap: 8px; }
+  .prefactura-producto-imagen { width: 43px; }
+  .prefactura-producto-importe strong { font-size: 14px; }
+  .editar-producto-contenido { padding-left: 14px; padding-right: 14px; }
+  .editar-producto-imagen { width: 48px; }
+  .editar-producto-descripcion { flex-wrap: wrap; gap: 2px; }
+  .editar-producto-controles { gap: 6px; }
+  .editar-producto-controles input { width: 46px; }
+}
+@media (prefers-reduced-transparency: reduce) { .editar-producto-sheet::backdrop { backdrop-filter: none; } }
+@media (prefers-reduced-motion: reduce) { .prefactura-screen *, .editar-producto-sheet * { transition-duration: .01ms !important; } }
+@media (max-height: 500px) {
+  .prefactura-screen { height: auto; min-height: 100dvh; }
+  .prefactura-detalle { min-height: auto; }
+  .prefactura-productos { overflow-y: visible; flex: none; }
+  .prefactura-header { position: sticky; top: 0; z-index: 10; }
+}

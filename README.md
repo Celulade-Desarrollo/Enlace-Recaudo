@@ -210,6 +210,22 @@ En [`InicioScreen.tsx`](file:///c:/proyectos/enlacecrm_nuevo/src/pantallas/Inici
 
 ##  Comandos de Ejecución
 
+### Detalle editable de prefacturas del transportista
+
+Al elegir una prefactura se abre su detalle desde abajo. Al tocar un producto,
+el editor inferior permite cambiar la cantidad, eliminar y deshacer. Los
+subtotales y el total se actualizan en vivo; Cancelar descarta la edición del
+producto. Generar Factura guarda el detalle y el nuevo saldo en `localStorage`
+y abre las cuatro opciones de pago con el monto actualizado.
+
+`productosService.ts` contiene ejemplos que conservan los saldos iniciales.
+Los precios y las cantidades son de demostración. Las cuatro fotografías son
+PNG oficiales de Alpina de 660 × 660; su procedencia está documentada en
+`public/productos/alpina/FUENTES.md`. No hay sincronización con Amovil.
+
+Las comprobaciones de recálculo, persistencia y recuperación se ejecutan con
+`npm test` y no acceden a servicios externos ni al almacenamiento del navegador.
+
 ```bash
 # Instalar dependencias
 npm install

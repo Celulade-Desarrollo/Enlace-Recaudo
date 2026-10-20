@@ -1,168 +1,142 @@
-import React, { useState } from 'react';
-import { motion } from 'motion/react';
+import { useState } from 'react';
+import { AnimatePresence } from 'motion/react';
 import { MobileStatusBar } from '../../components/atoms/MobileStatusBar/MobileStatusBar';
 import { MobileHomeBar } from '../../components/atoms/MobileHomeBar/MobileHomeBar';
 import { Icon } from '../../components/atoms/Icon/Icon';
 import { ModalOpcionPago } from '../../components/molecules/ModalOpcionPago/ModalOpcionPago';
+import { ModalEditarProducto } from '../../components/molecules/ModalEditarProducto/ModalEditarProducto';
 import type { PrefacturaCliente } from '../../services/transportistaService';
-import { obtenerPartesColombia } from '../../types/transaccion';
+import type { ProductoFactura } from '../../types/producto';
+import { actualizarProductos, formatearPesos, subtotalProducto } from '../../services/productosService';
+import './generarFactura.css';
 
 interface GenerarFacturaScreenProps {
   prefactura: PrefacturaCliente;
   onBack: () => void;
+  onPrefacturaChange: (prefactura: PrefacturaCliente) => void;
+  onGuardarFactura: (prefactura: PrefacturaCliente) => void;
   onPagoCompletoDigital: () => void;
   onPagoDosQr: (montoQr1: number, montoQr2: number) => void;
   onPagoParcial: (montoDigital: number, restanteEfectivo: number) => void;
   onPagoEfectivo: () => void;
-  onGenerarQr?: () => void;
   className?: string;
 }
 
-export const GenerarFacturaScreen: React.FC<GenerarFacturaScreenProps> = ({
-  prefactura,
-  onBack,
-  onPagoCompletoDigital,
-  onPagoDosQr,
-  onPagoParcial,
-  onPagoEfectivo,
-  onGenerarQr,
-  className = ''
-}) => {
+export function GenerarFacturaScreen({
+  prefactura, onBack, onPrefacturaChange, onGuardarFactura,
+  onPagoCompletoDigital, onPagoDosQr, onPagoParcial, onPagoEfectivo, className = ''
+}: GenerarFacturaScreenProps) {
   const [isModalOpcionesOpen, setIsModalOpcionesOpen] = useState(false);
-  // Asegurar fecha y hora oficial de Colombia
-  const partesCol = obtenerPartesColombia(new Date());
-  const fechaHoraActual = `${partesCol.dia} ${partesCol.mesTexto} ${partesCol.anio} ${partesCol.horaFormateada}`;
+  const [productoEnEdicion, setProductoEnEdicion] = useState<ProductoFactura | null>(null);
+  const [eliminado, setEliminado] = useState<{ producto: ProductoFactura; index: number } | null>(null);
+  const [error, setError] = useState('');
+  const productos = prefactura.productos ?? [];
+  const tieneDetalle = (prefactura.productosOriginales?.length ?? 0) > 0;
+  const puedeGenerar = prefactura.saldoTotalNum > 0 && (!tieneDetalle || productos.length > 0);
+  const valorOriginal = prefactura.valorOriginalNum;
+  const mostrarComparacion = prefactura.esFacturaModificada && valorOriginal !== undefined;
+
+  const cambiarProductos = (nuevos: ProductoFactura[]) => {
+    onPrefacturaChange(actualizarProductos(prefactura, nuevos));
+    setError('');
+  };
+  const cambiarCantidad = (cantidad: number) => {
+    if (!productoEnEdicion) return;
+    cambiarProductos(productos.map((producto) => producto.id === productoEnEdicion.id ? { ...producto, cantidad } : producto));
+  };
+  const cancelarEdicion = () => {
+    if (productoEnEdicion) {
+      cambiarProductos(productos.map((producto) => producto.id === productoEnEdicion.id ? productoEnEdicion : producto));
+    }
+    setProductoEnEdicion(null);
+  };
+  const eliminarProducto = () => {
+    if (!productoEnEdicion) return;
+    const index = productos.findIndex((producto) => producto.id === productoEnEdicion.id);
+    setEliminado({ producto: productos[index], index });
+    cambiarProductos(productos.filter((producto) => producto.id !== productoEnEdicion.id));
+    setProductoEnEdicion(null);
+  };
+  const deshacerEliminacion = () => {
+    if (!eliminado) return;
+    const restaurados = [...productos];
+    restaurados.splice(eliminado.index, 0, eliminado.producto);
+    cambiarProductos(restaurados);
+    setEliminado(null);
+  };
+  const generarFactura = () => {
+    if (!puedeGenerar) return;
+    try {
+      onGuardarFactura(prefactura);
+      setError('');
+      setIsModalOpcionesOpen(true);
+    } catch {
+      setError('No se pudieron guardar los cambios. Intenta generar la factura de nuevo.');
+    }
+  };
 
   return (
-    <div className={`w-full flex-1 flex flex-col bg-white relative pb-3 ${className}`}>
-      {/* Top Header con Status Bar */}
-      <header className="w-full bg-[#2F3CB3] text-white pt-1 pb-3 px-4 select-none sticky top-0 z-20 shadow-xs">
+    <div className={`prefactura-screen ${className}`}>
+      <header className="prefactura-header">
         <MobileStatusBar theme="light" time="9:30" />
-
-        <div className="flex items-center justify-between pt-1">
-          <button
-            type="button"
-            onClick={onBack}
-            aria-label="Volver"
-            className="w-9 h-9 rounded-full border border-white/90 flex items-center justify-center text-white hover:bg-white/15 active:scale-95 transition-all cursor-pointer shrink-0"
-          >
-            <Icon name="arrow-left" size={19} stroke={2.5} />
-          </button>
-
-          <h2 className="text-base sm:text-lg font-bold text-white tracking-wide text-center truncate px-2">
-            Generar Factura
-          </h2>
-
-          <div className="w-9 shrink-0 pointer-events-none" />
+        <div className="prefactura-header-titulo">
+          <button type="button" className="prefactura-back" aria-label="Volver a facturas" onClick={onBack}><Icon name="arrow-left" size={20} /></button>
+          <h1>Generar Factura</h1><span aria-hidden="true" />
         </div>
       </header>
-
-      {/* Contenido principal idéntico a Image 4 */}
-      <main className="flex-1 flex flex-col items-center px-6 pt-5 pb-4 text-center">
-        {/* Icono de factura recibo */}
-        <motion.div
-          initial={{ scale: 0.8, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ duration: 0.25 }}
-          className="w-14 h-14 flex items-center justify-center text-[#2F3CB3] mb-1.5"
-        >
-          <svg
-            width="44"
-            height="44"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="#2F3CB3"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1-2-1Z" />
-            <path d="M12 7v10" />
-            <path d="M15 9.5a2.5 2.5 0 0 0-5 0c0 4 5 1.5 5 5a2.5 2.5 0 0 1-5 0" />
-          </svg>
-        </motion.div>
-
-        <h1 className="text-xl font-bold text-slate-900 tracking-tight">
-          Factura Generada
-        </h1>
-
-        <span className="text-xs text-slate-500 font-medium mt-2">
-          Valor
-        </span>
-        <div className="text-[34px] sm:text-[38px] font-black text-slate-900 tracking-tight leading-none mt-1 mb-5">
-          {prefactura.saldoTotal}
+      <main className="prefactura-detalle">
+        <div className="prefactura-cliente">
+          <span className="prefactura-tienda-icon" aria-hidden="true"><Icon name="building-store" size={25} /></span>
+          <div><h2>{prefactura.pagador}</h2><p>No. Prefactura <span>{prefactura.numeroPrefactura}</span></p></div>
         </div>
-
-        {/* Tabla de detalles con líneas punteadas */}
-        <div className="w-full flex flex-col text-sm border-t border-dashed border-slate-200 pt-2 mb-5">
-          <div className="flex justify-between py-2.5 border-b border-dashed border-slate-200">
-            <span className="font-bold text-slate-900">Factura No.</span>
-            <span className="text-slate-800 font-medium">{prefactura.numeroPrefactura}</span>
-          </div>
-
-          <div className="flex justify-between py-2.5 border-b border-dashed border-slate-200">
-            <span className="font-bold text-slate-900">Pagador</span>
-            <span className="text-slate-800 font-medium">{prefactura.pagador}</span>
-          </div>
-
-          <div className="flex justify-between py-2.5 border-b border-dashed border-slate-200">
-            <span className="font-bold text-slate-900">Medio de Pago</span>
-            <span className="text-slate-800 font-medium">{prefactura.medioPago}</span>
-          </div>
-
-          <div className="flex justify-between py-2.5 border-b border-dashed border-slate-200">
-            <span className="font-bold text-slate-900">Fecha y Hora</span>
-            <span className="text-slate-800 font-medium">{fechaHoraActual}</span>
-          </div>
+        <div className="prefactura-seccion-titulo"><h2>Detalle de Prefactura</h2><p>Toca un producto para editar su cantidad.</p></div>
+        <div className="prefactura-productos">
+          {productos.map((producto) => (
+            <button key={producto.id} type="button" className="prefactura-producto"
+              aria-label={`Editar ${producto.nombre}, ${producto.cantidad} ${producto.cantidad === 1 ? 'unidad' : 'unidades'}`}
+              onClick={() => { setProductoEnEdicion({ ...producto }); setEliminado(null); }}
+            >
+              <img src={producto.imagen} alt="" width="60" height="64" className="prefactura-producto-imagen" />
+              <span className="prefactura-producto-info">
+                <span className="prefactura-producto-nombre">{producto.nombre}</span>
+                <span className="prefactura-producto-presentacion">{producto.presentacion} · Und. {formatearPesos(producto.precioUnitario)}</span>
+              </span>
+              <span className="prefactura-producto-importe"><span>x {producto.cantidad} und</span><strong>{formatearPesos(subtotalProducto(producto))}</strong></span>
+            </button>
+          ))}
+          {productos.length === 0 && (
+            <div className="prefactura-vacia"><Icon name="receipt" size={30} />
+              <p>{tieneDetalle ? 'La factura no tiene productos.' : 'El detalle de productos aún no está disponible.'}</p>
+              {tieneDetalle && <span>Deshaz la eliminación o cancela para volver a las facturas.</span>}
+            </div>
+          )}
         </div>
-
-        <p className="text-[13px] text-[#8e8e93] text-center mb-6">
-          Elige la opción para cobrar esta factura al tendero.
-        </p>
-
-        {/* Botón Elegir opción de pago */}
-        <div className="w-full mt-auto pt-1 pb-2">
-          <motion.button
-            type="button"
-            whileTap={{ scale: 0.97 }}
-            onClick={() => setIsModalOpcionesOpen(true)}
-            className="w-full h-12 rounded-full bg-[#2F3CB3] hover:bg-[#2532a1] text-white font-bold text-sm shadow-md transition-all cursor-pointer flex items-center justify-center gap-2 select-none"
-          >
-            <Icon name="wallet" size={18} stroke={2.2} />
-            <span>Elegir opción de pago</span>
-          </motion.button>
+        {eliminado && <div className="prefactura-deshacer" role="status"><span>Producto eliminado</span><button type="button" onClick={deshacerEliminacion}>Deshacer</button></div>}
+        <div className="prefactura-resumen" role="status" aria-live="polite" aria-atomic="true">
+          {mostrarComparacion && (
+            <div className="prefactura-valor-original"><span>Valor original</span><s>{formatearPesos(valorOriginal)}</s></div>
+          )}
+          <div className="prefactura-total"><span>{mostrarComparacion ? 'Valor editado' : 'Total'}</span><strong>{prefactura.saldoTotal}</strong></div>
+        </div>
+        <div className="prefactura-footer">
+          {error && <p className="producto-error" role="alert">{error}</p>}
+          <div className="prefactura-acciones">
+            <button type="button" className="prefactura-button secundario" onClick={onBack}>Cancelar</button>
+            <button id="generar-prefactura" type="button" className="prefactura-button primario" disabled={!puedeGenerar} onClick={generarFactura}>Generar Factura</button>
+          </div>
         </div>
       </main>
-
-      {/* Modal Bottom Sheet para Elegir Opción de Pago */}
-      <ModalOpcionPago
-        isOpen={isModalOpcionesOpen}
-        onClose={() => setIsModalOpcionesOpen(false)}
-        prefactura={prefactura}
-        onSelectPagoCompletoDigital={() => {
-          setIsModalOpcionesOpen(false);
-          if (onPagoCompletoDigital) {
-            onPagoCompletoDigital();
-          } else if (onGenerarQr) {
-            onGenerarQr();
-          }
-        }}
-        onSelectPagoDosQr={(montoQr1, montoQr2) => {
-          setIsModalOpcionesOpen(false);
-          onPagoDosQr(montoQr1, montoQr2);
-        }}
-        onSelectPagoParcial={(montoDigital, restanteEfectivo) => {
-          setIsModalOpcionesOpen(false);
-          onPagoParcial(montoDigital, restanteEfectivo);
-        }}
-        onSelectPagoEfectivo={() => {
-          setIsModalOpcionesOpen(false);
-          onPagoEfectivo();
-        }}
-      />
-
-      {/* Barra de inicio móvil */}
       <MobileHomeBar theme="dark" />
+      <AnimatePresence>
+        {productoEnEdicion && <ModalEditarProducto key={productoEnEdicion.id} producto={productoEnEdicion}
+          onCantidadChange={cambiarCantidad} onCancelar={cancelarEdicion}
+          onGuardar={() => setProductoEnEdicion(null)} onEliminar={eliminarProducto} />}
+      </AnimatePresence>
+      <ModalOpcionPago isOpen={isModalOpcionesOpen} onClose={() => setIsModalOpcionesOpen(false)} prefactura={prefactura}
+        onSelectPagoCompletoDigital={() => { setIsModalOpcionesOpen(false); onPagoCompletoDigital(); }}
+        onSelectPagoDosQr={(monto1, monto2) => { setIsModalOpcionesOpen(false); onPagoDosQr(monto1, monto2); }}
+        onSelectPagoParcial={(digital, efectivo) => { setIsModalOpcionesOpen(false); onPagoParcial(digital, efectivo); }}
+        onSelectPagoEfectivo={() => { setIsModalOpcionesOpen(false); onPagoEfectivo(); }} />
     </div>
   );
-};
+}

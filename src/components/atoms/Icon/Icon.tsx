@@ -25,6 +25,8 @@ import {
   IconDeviceMobile,
   IconCalculator,
   IconArrowRight,
+  IconMinus,
+  IconTrash,
   type TablerIcon
 } from '@tabler/icons-react';
 
@@ -53,7 +55,9 @@ export type IconName =
   | 'arrows-split'
   | 'device-mobile'
   | 'calculator'
-  | 'arrow-right';
+  | 'arrow-right'
+  | 'minus'
+  | 'trash';
 
 const iconMap: Record<IconName, TablerIcon> = {
   home: IconHome,
@@ -81,6 +85,8 @@ const iconMap: Record<IconName, TablerIcon> = {
   'device-mobile': IconDeviceMobile,
   calculator: IconCalculator,
   'arrow-right': IconArrowRight,
+  minus: IconMinus,
+  trash: IconTrash,
 };
 
 interface IconProps {
