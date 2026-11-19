@@ -70,7 +70,7 @@ export function GenerarFacturaScreen({
       setError('');
       setIsModalOpcionesOpen(true);
     } catch {
-      setError('No se pudieron guardar los cambios. Intenta generar la factura de nuevo.');
+      setError('No se pudieron guardar los cambios. Intenta continuar de nuevo.');
     }
   };
 
@@ -79,15 +79,15 @@ export function GenerarFacturaScreen({
       <header className="prefactura-header">
         <div className="prefactura-header-titulo">
           <button type="button" className="prefactura-back" aria-label="Volver a facturas" onClick={onBack}><Icon name="arrow-left" size={20} /></button>
-          <h1>Generar Factura</h1><span aria-hidden="true" />
+          <h1>Modificación de Factura</h1><span aria-hidden="true" />
         </div>
       </header>
       <main className="prefactura-detalle">
         <div className="prefactura-cliente">
           <span className="prefactura-tienda-icon" aria-hidden="true"><Icon name="building-store" size={25} /></span>
-          <div><h2>{prefactura.pagador}</h2><p>No. Prefactura <span>{prefactura.numeroPrefactura}</span></p></div>
+          <div><h2>{prefactura.pagador}</h2><p>No. Factura <span>{prefactura.numeroPrefactura}</span></p></div>
         </div>
-        <div className="prefactura-seccion-titulo"><h2>Detalle de Prefactura</h2><p>Toca un producto para editar su cantidad.</p></div>
+        <div className="prefactura-seccion-titulo"><h2>Detalle de Factura</h2><p>Toca un producto para editar su cantidad.</p></div>
         <div className="prefactura-productos">
           {productos.map((producto) => (
             <button key={producto.id} type="button" className="prefactura-producto"
@@ -120,7 +120,7 @@ export function GenerarFacturaScreen({
           {error && <p className="producto-error" role="alert">{error}</p>}
           <div className="prefactura-acciones">
             <button type="button" className="prefactura-button secundario" onClick={onBack}>Cancelar</button>
-            <button id="generar-prefactura" type="button" className="prefactura-button primario" disabled={!puedeGenerar} onClick={generarFactura}>Generar Factura</button>
+            <button id="continuar-pago" type="button" className="prefactura-button primario" disabled={!puedeGenerar} onClick={generarFactura}>Continuar</button>
           </div>
         </div>
       </main>

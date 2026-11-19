@@ -27,6 +27,18 @@ import {
   IconArrowRight,
   IconMinus,
   IconTrash,
+  IconClipboardCheck,
+  IconFileText,
+  IconLock,
+  IconMapPin,
+  IconPhone,
+  IconTruck,
+  IconShare,
+  IconDownload,
+  IconAlertTriangle,
+  IconCalendar,
+  IconRefresh,
+  IconChartBar,
   type TablerIcon
 } from '@tabler/icons-react';
 
@@ -57,7 +69,19 @@ export type IconName =
   | 'calculator'
   | 'arrow-right'
   | 'minus'
-  | 'trash';
+  | 'trash'
+  | 'clipboard-check'
+  | 'file-text'
+  | 'lock'
+  | 'map-pin'
+  | 'phone'
+  | 'truck'
+  | 'share'
+  | 'download'
+  | 'alert-triangle'
+  | 'calendar'
+  | 'refresh'
+  | 'chart-bar';
 
 const iconMap: Record<IconName, TablerIcon> = {
   home: IconHome,
@@ -87,6 +111,18 @@ const iconMap: Record<IconName, TablerIcon> = {
   'arrow-right': IconArrowRight,
   minus: IconMinus,
   trash: IconTrash,
+  'clipboard-check': IconClipboardCheck,
+  'file-text': IconFileText,
+  lock: IconLock,
+  'map-pin': IconMapPin,
+  phone: IconPhone,
+  truck: IconTruck,
+  share: IconShare,
+  download: IconDownload,
+  'alert-triangle': IconAlertTriangle,
+  calendar: IconCalendar,
+  refresh: IconRefresh,
+  'chart-bar': IconChartBar,
 };
 
 interface IconProps {

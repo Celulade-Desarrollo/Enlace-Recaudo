@@ -46,34 +46,28 @@ export const TransportistaBottomNav: React.FC<TransportistaBottomNavProps> = ({
           </span>
         </motion.button>
 
-        {/* Movimientos */}
+        {/* Resumen y Cierre de Ruta */}
         <motion.button
           type="button"
           onClick={() => onTabChange('movimientos')}
           whileTap={{ scale: 0.92 }}
           transition={{ duration: 0.12 }}
-          className="flex flex-col items-center justify-center py-1.5 px-4 cursor-pointer group"
-          aria-label="Movimientos"
+          className="flex flex-col items-center justify-center py-1.5 px-3 cursor-pointer group"
+          aria-label="Resumen y Cierre de Ruta"
         >
           <div
             className={`transition-colors duration-200 ${
               activeTab === 'movimientos' ? 'text-[#2F3CB3]' : 'text-slate-600 group-hover:text-[#1B2075]'
             }`}
           >
-            <div
-              className={`w-6 h-6 rounded-full border-2 flex items-center justify-center font-bold text-xs leading-none ${
-                activeTab === 'movimientos' ? 'border-[#2F3CB3] text-[#2F3CB3]' : 'border-slate-600 text-slate-600'
-              }`}
-            >
-              $
-            </div>
+            <Icon name="clipboard-check" size={24} stroke={activeTab === 'movimientos' ? 2.3 : 1.8} />
           </div>
           <span
             className={`text-[11px] font-medium tracking-tight mt-1 transition-colors duration-200 ${
               activeTab === 'movimientos' ? 'text-[#2F3CB3] font-semibold' : 'text-slate-600'
             }`}
           >
-            Movimientos
+            Resumen Ruta
           </span>
         </motion.button>
 

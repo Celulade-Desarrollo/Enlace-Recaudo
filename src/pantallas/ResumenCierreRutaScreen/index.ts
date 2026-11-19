@@ -1,0 +1,2 @@
+export { ResumenCierreRutaScreen } from './ResumenCierreRutaScreen';
+

@@ -22,10 +22,10 @@ export const PrefacturaCard: React.FC<PrefacturaCardProps> = ({
       onClick={() => onClick?.(prefactura)}
       className={`bg-white rounded-2xl p-4 flex items-center justify-between border border-slate-100 shadow-[0_2px_8px_rgba(0,0,0,0.04)] hover:shadow-md hover:border-slate-200 transition-all cursor-pointer select-none ${className}`}
     >
-      {/* Lado izquierdo: No. Prefactura */}
+      {/* Lado izquierdo: No. Factura */}
       <div className="flex flex-col min-w-0 pr-2">
         <span className="text-[13px] font-bold text-slate-900 leading-snug">
-          No. Prefactura
+          No. Factura
         </span>
         <span className="text-sm font-medium text-slate-700 mt-0.5">
           {prefactura.numeroPrefactura}

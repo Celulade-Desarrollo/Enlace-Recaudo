@@ -35,7 +35,7 @@ export function ModalEditarProducto({
       dialog?.close();
       document.body.style.overflow = overflowAnterior;
       if (activador?.isConnected) activador.focus({ preventScroll: true });
-      else document.getElementById('generar-prefactura')?.focus({ preventScroll: true });
+      else (document.getElementById('continuar-pago') || document.getElementById('generar-prefactura'))?.focus({ preventScroll: true });
     };
   }, []);
 

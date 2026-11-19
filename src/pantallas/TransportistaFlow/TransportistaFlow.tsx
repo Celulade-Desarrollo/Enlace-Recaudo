@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import { TransportistaHomeScreen } from '../TransportistaHomeScreen/TransportistaHomeScreen';
-import { FacturasARecaudarScreen } from '../FacturasARecaudarScreen/FacturasARecaudarScreen';
 import { GenerarFacturaScreen } from '../GenerarFacturaScreen/GenerarFacturaScreen';
 import { CobroQrBrebScreen } from '../CobroQrBrebScreen/CobroQrBrebScreen';
 import { CobroEfectivoScreen, type DetallesConfirmacionEfectivo } from '../CobroEfectivoScreen/CobroEfectivoScreen';
@@ -9,6 +8,7 @@ import {
   TransportistaPagoRecibidoScreen,
   type DetallesPagoRealizado
 } from '../TransportistaPagoRecibidoScreen/TransportistaPagoRecibidoScreen';
+import { ResumenCierreRutaScreen } from '../ResumenCierreRutaScreen/ResumenCierreRutaScreen';
 import {
   transportistaService,
   type TiendaRuta,
@@ -17,12 +17,12 @@ import {
 
 type TransportistaPaso =
   | 'home'
-  | 'facturas'
   | 'generar'
   | 'qr'
   | 'qr2'
   | 'efectivo'
-  | 'recibido';
+  | 'recibido'
+  | 'cierre';
 
 export const TransportistaFlow: React.FC = () => {
   const reducirMovimiento = useReducedMotion();
@@ -42,8 +42,9 @@ export const TransportistaFlow: React.FC = () => {
   // Soporte nativo para botón 'Atrás' en celulares (Mobile First: PopState / Gestos de retroceso)
   useEffect(() => {
     const handlePopState = (event: PopStateEvent) => {
-      if (event.state && event.state.paso) {
-        setPaso(event.state.paso);
+      const p = event.state?.paso;
+      if (p && ['home', 'generar', 'qr', 'qr2', 'efectivo', 'recibido', 'cierre'].includes(p)) {
+        setPaso(p);
       } else {
         setPaso('home');
       }
@@ -61,26 +62,25 @@ export const TransportistaFlow: React.FC = () => {
     }
   };
 
-  // 1. Al seleccionar una tienda pendiente desde "Ruta de hoy"
+  // 1. Al seleccionar una tienda pendiente desde afuera: pasa DIRECTAMENTE a la factura
   const handleSelectTienda = (tienda: TiendaRuta) => {
     if (tienda.estado === 'pendiente') {
-      setTiendaSeleccionada(tienda);
-      transicionarA('facturas');
+      const facturas = transportistaService.getPrefacturasByTienda(tienda.id);
+      const factura = facturas[0];
+      if (factura) {
+        setTiendaSeleccionada(tienda);
+        window.scrollTo(0, 0);
+        setPrefacturaSeleccionada(factura);
+        setPagoInfo(null);
+        setEsPagoParcial(false);
+        setEsDosQr(false);
+        setMontoQr1(0);
+        setMontoQr2(0);
+        setMontoParcialQr(undefined);
+        setRestanteEfectivo(0);
+        transicionarA('generar');
+      }
     }
-  };
-
-  // 2. Al seleccionar una prefactura a recaudar
-  const handleSelectPrefactura = (prefactura: PrefacturaCliente) => {
-    window.scrollTo(0, 0);
-    setPrefacturaSeleccionada(prefactura);
-    setPagoInfo(null);
-    setEsPagoParcial(false);
-    setEsDosQr(false);
-    setMontoQr1(0);
-    setMontoQr2(0);
-    setMontoParcialQr(undefined);
-    setRestanteEfectivo(0);
-    transicionarA('generar');
   };
 
   // 3a. Opción 1: Pago completo por medios digitales
@@ -148,10 +148,11 @@ export const TransportistaFlow: React.FC = () => {
     } else {
       // En pago completo digital, registramos y finalizamos
       if (tiendaSeleccionada && prefacturaSeleccionada) {
-        transportistaService.registrarPagoPrefactura(
+        transportistaService.registrarPagoFacturaDetallado(
           tiendaSeleccionada.id,
           prefacturaSeleccionada.numeroPrefactura,
-          prefacturaSeleccionada.saldoTotal
+          prefacturaSeleccionada.saldoTotal,
+          { tipo: 'digital_completo', montoDigital: prefacturaSeleccionada.saldoTotalNum }
         );
       }
       transicionarA('recibido');
@@ -161,10 +162,11 @@ export const TransportistaFlow: React.FC = () => {
   // 4b. Al confirmar el pago en el 2do QR (dos digitales)
   const handleConfirmarSegundoQr = () => {
     if (tiendaSeleccionada && prefacturaSeleccionada) {
-      transportistaService.registrarPagoPrefactura(
+      transportistaService.registrarPagoFacturaDetallado(
         tiendaSeleccionada.id,
         prefacturaSeleccionada.numeroPrefactura,
-        prefacturaSeleccionada.saldoTotal
+        prefacturaSeleccionada.saldoTotal,
+        { tipo: 'dos_qr', montoDigital: prefacturaSeleccionada.saldoTotalNum }
       );
     }
     setPagoInfo({
@@ -178,10 +180,20 @@ export const TransportistaFlow: React.FC = () => {
   // 5. Al confirmar el pago en efectivo (completo o restante)
   const handleConfirmarPagoEfectivo = (detalles: DetallesConfirmacionEfectivo) => {
     if (tiendaSeleccionada && prefacturaSeleccionada) {
-      transportistaService.registrarPagoPrefactura(
+      transportistaService.registrarPagoFacturaDetallado(
         tiendaSeleccionada.id,
         prefacturaSeleccionada.numeroPrefactura,
-        prefacturaSeleccionada.saldoTotal
+        prefacturaSeleccionada.saldoTotal,
+        esPagoParcial
+          ? {
+              tipo: 'parcial',
+              montoDigital: montoParcialQr,
+              montoEfectivo: restanteEfectivo
+            }
+          : {
+              tipo: 'efectivo',
+              montoEfectivo: prefacturaSeleccionada.saldoTotalNum
+            }
       );
     }
 
@@ -205,12 +217,22 @@ export const TransportistaFlow: React.FC = () => {
     transicionarA('recibido');
   };
 
-  // 6. Retroceso seguro
+  // 6. Navegación a Resumen y Cierre de Ruta
+  const handleVerResumenCierre = () => {
+    transicionarA('cierre');
+  };
+
+  const handleSelectTiendaDesdeResumen = (tienda: TiendaRuta) => {
+    handleSelectTienda(tienda);
+  };
+
+  // 7. Retroceso seguro e inmediato
   const handleBack = (pasoDestino: TransportistaPaso) => {
-    if (window.history.state && window.history.state.paso) {
-      window.history.back();
-    } else {
-      setPaso(pasoDestino);
+    setPaso(pasoDestino);
+    try {
+      window.history.pushState({ paso: pasoDestino }, '');
+    } catch {
+      // fallback
     }
   };
 
@@ -240,7 +262,9 @@ export const TransportistaFlow: React.FC = () => {
     <div className="w-full min-h-dvh bg-white sm:bg-slate-100 flex justify-center items-start sm:py-6">
       <div className="w-full max-w-[430px] min-h-dvh sm:min-h-[850px] bg-white shadow-none sm:shadow-2xl relative flex flex-col overflow-hidden sm:rounded-[36px] border-0 sm:border sm:border-slate-200">
         <AnimatePresence mode="wait">
-          {paso === 'home' && (
+          {(paso === 'home' ||
+            (paso !== 'cierre' && !prefacturaSeleccionada) ||
+            !['cierre', 'generar', 'qr', 'qr2', 'efectivo', 'recibido'].includes(paso)) && (
             <motion.div
               key="flow-home"
               initial={{ opacity: 0 }}
@@ -249,23 +273,9 @@ export const TransportistaFlow: React.FC = () => {
               transition={{ duration: 0.18 }}
               className="w-full flex-1 flex flex-col"
             >
-              <TransportistaHomeScreen onSelectTienda={handleSelectTienda} />
-            </motion.div>
-          )}
-
-          {paso === 'facturas' && tiendaSeleccionada && (
-            <motion.div
-              key="flow-facturas"
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              transition={{ duration: 0.2, ease: [0.25, 1, 0.5, 1] }}
-              className="w-full flex-1 flex flex-col"
-            >
-              <FacturasARecaudarScreen
-                tienda={tiendaSeleccionada}
-                onBack={() => handleBack('home')}
-                onSelectPrefactura={handleSelectPrefactura}
+              <TransportistaHomeScreen
+                onSelectTienda={handleSelectTienda}
+                onVerResumenCierre={handleVerResumenCierre}
               />
             </motion.div>
           )}
@@ -287,7 +297,7 @@ export const TransportistaFlow: React.FC = () => {
                   transportistaService.guardarPrefactura(tiendaSeleccionada.id, prefactura);
                   setTiendaSeleccionada(transportistaService.getTiendaById(tiendaSeleccionada.id) ?? tiendaSeleccionada);
                 }}
-                onBack={() => handleBack('facturas')}
+                onBack={() => handleBack('home')}
                 onPagoCompletoDigital={handlePagoCompletoDigital}
                 onPagoDosQr={handlePagoDosQr}
                 onPagoParcial={handlePagoParcial}
@@ -374,6 +384,22 @@ export const TransportistaFlow: React.FC = () => {
                 prefactura={prefacturaSeleccionada}
                 detallesPago={pagoInfo}
                 onRegresar={handleRegresarAHome}
+              />
+            </motion.div>
+          )}
+
+          {paso === 'cierre' && (
+            <motion.div
+              key="flow-cierre"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              transition={{ duration: 0.2, ease: [0.25, 1, 0.5, 1] }}
+              className="w-full flex-1 flex flex-col"
+            >
+              <ResumenCierreRutaScreen
+                onBack={() => handleBack('home')}
+                onSelectTienda={handleSelectTiendaDesdeResumen}
               />
             </motion.div>
           )}

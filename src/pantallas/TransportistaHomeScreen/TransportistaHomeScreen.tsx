@@ -16,6 +16,7 @@ import {
 
 interface TransportistaHomeScreenProps {
   onSelectTienda?: (tienda: TiendaRuta) => void;
+  onVerResumenCierre?: () => void;
   className?: string;
 }
 
@@ -40,22 +41,27 @@ const itemVariants: Variants = {
 
 export const TransportistaHomeScreen: React.FC<TransportistaHomeScreenProps> = ({
   onSelectTienda,
+  onVerResumenCierre,
   className = ''
 }) => {
   const [activeNavTab, setActiveNavTab] = useState<TransportistaTab>('inicio');
   const [filtroRuta, setFiltroRuta] = useState<'pendientes' | 'visitados'>('pendientes');
   const [busqueda, setBusqueda] = useState('');
 
+  const resumenRuta = useMemo(() => {
+    return transportistaService.getResumenRutaDetallado();
+  }, []);
+
   const tiendas = useMemo(() => {
     return transportistaService.getTiendasRuta();
-  }, [filtroRuta]);
+  }, []);
 
   const pendientes = useMemo(() => tiendas.filter((t) => t.estado === 'pendiente'), [tiendas]);
   const visitados = useMemo(() => tiendas.filter((t) => t.estado === 'visitado'), [tiendas]);
 
   const totalARecaudar = useMemo(() => {
     return transportistaService.getTotalARecaudarHoy().formateado;
-  }, [tiendas]);
+  }, []);
 
   // Lista según filtro activo y búsqueda
   const tiendasFiltradas = useMemo(() => {
@@ -153,14 +159,38 @@ export const TransportistaHomeScreen: React.FC<TransportistaHomeScreenProps> = (
                 className="flex flex-col gap-3 mt-1"
               >
                 {tiendasFiltradas.length === 0 ? (
-                  <div className="text-center py-8 bg-white rounded-2xl border border-dashed border-slate-200">
-                    <p className="text-sm text-slate-500 font-medium">
-                      {busqueda
-                        ? `No hay clientes que coincidan con "${busqueda}"`
-                        : filtroRuta === 'pendientes'
-                        ? 'No hay cobros pendientes en la ruta de hoy'
-                        : 'Aún no se han registrado cobros visitados'}
-                    </p>
+                  <div className="text-center py-8 px-4 bg-white rounded-2xl border border-slate-100 shadow-[0_2px_8px_rgba(0,0,0,0.03)] flex flex-col items-center">
+                    {busqueda ? (
+                      <p className="text-sm text-slate-500 font-medium">
+                        No hay clientes que coincidan con "{busqueda}"
+                      </p>
+                    ) : filtroRuta === 'pendientes' ? (
+                      /* Cuando ya no quedan más tiendas por visitar */
+                      <div className="flex flex-col items-center text-center py-2 w-full max-w-[320px]">
+                        <div className="w-14 h-14 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center mb-3 border border-emerald-100/80">
+                          <Icon name="circle-check" size={28} stroke={2.2} />
+                        </div>
+                        <h3 className="text-base font-bold text-slate-900 tracking-tight">
+                          ¡Ruta completada!
+                        </h3>
+                        <p className="text-xs text-slate-500 mt-1 mb-5 leading-relaxed">
+                          No quedan más tiendas por visitar. Ya puedes realizar el arqueo y cierre diario de ruta.
+                        </p>
+                        <motion.button
+                          type="button"
+                          whileTap={{ scale: 0.98 }}
+                          onClick={onVerResumenCierre}
+                          className="w-full h-12 rounded-full bg-[#2F3CB3] hover:bg-[#2532a1] text-white text-xs font-bold flex items-center justify-center gap-2 shadow-xs transition-all cursor-pointer select-none"
+                        >
+                          <Icon name="clipboard-check" size={18} stroke={2.2} />
+                          <span>Resumen y Cierre de Ruta</span>
+                        </motion.button>
+                      </div>
+                    ) : (
+                      <p className="text-sm text-slate-500 font-medium">
+                        Aún no se han registrado cobros visitados
+                      </p>
+                    )}
                   </div>
                 ) : (
                   tiendasFiltradas.map((tienda) => (
@@ -198,12 +228,23 @@ export const TransportistaHomeScreen: React.FC<TransportistaHomeScreenProps> = (
             <div className="flex items-center justify-between bg-slate-50 border border-slate-100 p-3.5 rounded-2xl mb-1">
               <div>
                 <span className="text-xs text-slate-500 font-medium">Total recaudado</span>
-                <div className="text-xl font-black text-slate-900">$3.130.500</div>
+                <div className="text-xl font-black text-slate-900">${resumenRuta.totalRecaudado.toLocaleString('es-CO')}</div>
               </div>
               <div className="px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs font-bold border border-emerald-200">
-                {visitados.length} visitas
+                {resumenRuta.tiendasVisitadas} visitas
               </div>
             </div>
+
+            {onVerResumenCierre && (
+              <button
+                type="button"
+                onClick={onVerResumenCierre}
+                className="w-full py-3 px-4 rounded-2xl bg-[#2F3CB3] text-white text-xs font-bold flex items-center justify-center gap-2 shadow-xs cursor-pointer"
+              >
+                <Icon name="clipboard-check" size={17} stroke={2.2} />
+                <span>Ver Resumen y Cierre Detallado de Ruta</span>
+              </button>
+            )}
 
             <h2 className="text-sm font-bold text-slate-800 mt-2">Detalle de cobranzas</h2>
             {visitados.map((tienda) => (
@@ -241,7 +282,13 @@ export const TransportistaHomeScreen: React.FC<TransportistaHomeScreenProps> = (
       {/* Barra de Navegación Inferior Móvil */}
       <TransportistaBottomNav
         activeTab={activeNavTab}
-        onTabChange={setActiveNavTab}
+        onTabChange={(tab) => {
+          if (tab === 'movimientos' && onVerResumenCierre) {
+            onVerResumenCierre();
+          } else {
+            setActiveNavTab(tab);
+          }
+        }}
       />
     </div>
   );

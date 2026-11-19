@@ -85,7 +85,7 @@ export const CobroQrBrebScreen: React.FC<CobroQrBrebScreenProps> = ({
           </div>
 
           <p className="text-[13px] text-slate-500 font-medium mt-1">
-            {prefactura.pagador} · #{prefactura.numeroPrefactura}
+            {prefactura.pagador} · Factura #{prefactura.numeroPrefactura}
           </p>
 
           {esDosQr ? (
