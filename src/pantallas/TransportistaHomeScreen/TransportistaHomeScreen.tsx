@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { motion, AnimatePresence, type Variants } from 'motion/react';
 import { EnlaceLogo } from '../../components/atoms/Logo/EnlaceLogo';
 import { Avatar } from '../../components/atoms/Avatar/Avatar';
@@ -13,6 +13,7 @@ import {
   transportistaService,
   type TiendaRuta
 } from '../../services/transportistaService';
+import { useAuth } from '../../context/AuthContext';
 
 interface TransportistaHomeScreenProps {
   onSelectTienda?: (tienda: TiendaRuta) => void;
@@ -44,9 +45,25 @@ export const TransportistaHomeScreen: React.FC<TransportistaHomeScreenProps> = (
   onVerResumenCierre,
   className = ''
 }) => {
+  const { user, logout } = useAuth();
   const [activeNavTab, setActiveNavTab] = useState<TransportistaTab>('inicio');
   const [filtroRuta, setFiltroRuta] = useState<'pendientes' | 'visitados'>('pendientes');
   const [busqueda, setBusqueda] = useState('');
+  const [showUserMenu, setShowUserMenu] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  // Cerrar menú al tocar fuera
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setShowUserMenu(false);
+      }
+    };
+    if (showUserMenu) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [showUserMenu]);
 
   const resumenRuta = useMemo(() => {
     return transportistaService.getResumenRutaDetallado();
@@ -90,7 +107,43 @@ export const TransportistaHomeScreen: React.FC<TransportistaHomeScreenProps> = (
             {/* Top Bar: Logo + Avatar LM */}
             <div className="flex items-center justify-between pt-1.5 pb-2">
               <EnlaceLogo />
-              <Avatar initials="LM" size="sm" />
+              <div className="relative" ref={menuRef}>
+                <Avatar
+                  initials={user ? user.nombre.split(' ').map(n => n[0]).join('') : 'LM'}
+                  size="sm"
+                  onClick={() => setShowUserMenu(!showUserMenu)}
+                />
+                <AnimatePresence>
+                  {showUserMenu && (
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0.9, y: -4 }}
+                      animate={{ opacity: 1, scale: 1, y: 0 }}
+                      exit={{ opacity: 0, scale: 0.9, y: -4 }}
+                      transition={{ duration: 0.15 }}
+                      className="absolute right-0 top-full mt-2 w-52 bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden z-50"
+                    >
+                      {/* Info del usuario */}
+                      <div className="px-4 py-3 border-b border-slate-100">
+                        <p className="text-sm font-bold text-slate-800 truncate">
+                          {user?.nombre ?? 'Usuario'}
+                        </p>
+                        <p className="text-xs text-slate-500 mt-0.5 capitalize">
+                          {user?.rol ?? 'transportista'}
+                        </p>
+                      </div>
+                      {/* Cerrar sesión */}
+                      <button
+                        type="button"
+                        onClick={() => { setShowUserMenu(false); logout(); }}
+                        className="w-full flex items-center gap-2.5 px-4 py-3 text-sm font-medium text-red-600 hover:bg-red-50 transition-colors cursor-pointer"
+                      >
+                        <Icon name="logout" size={17} stroke={2.2} />
+                        <span>Cerrar sesión</span>
+                      </button>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
             </div>
 
             {/* Total a recaudar */}
@@ -116,11 +169,10 @@ export const TransportistaHomeScreen: React.FC<TransportistaHomeScreenProps> = (
                 type="button"
                 whileTap={{ scale: 0.96 }}
                 onClick={() => setFiltroRuta('pendientes')}
-                className={`flex items-center justify-center gap-2 py-2.5 px-3 rounded-full text-xs font-bold transition-all cursor-pointer select-none ${
-                  filtroRuta === 'pendientes'
+                className={`flex items-center justify-center gap-2 py-2.5 px-3 rounded-full text-xs font-bold transition-all cursor-pointer select-none ${filtroRuta === 'pendientes'
                     ? 'bg-[#2F3CB3] text-white shadow-xs'
                     : 'bg-[#F1F3F7] text-slate-700 hover:bg-slate-200'
-                }`}
+                  }`}
               >
                 <Icon name="clock" size={17} stroke={2.2} />
                 <span>Pendientes ({pendientes.length})</span>
@@ -130,11 +182,10 @@ export const TransportistaHomeScreen: React.FC<TransportistaHomeScreenProps> = (
                 type="button"
                 whileTap={{ scale: 0.96 }}
                 onClick={() => setFiltroRuta('visitados')}
-                className={`flex items-center justify-center gap-2 py-2.5 px-3 rounded-full text-xs font-bold transition-all cursor-pointer select-none ${
-                  filtroRuta === 'visitados'
+                className={`flex items-center justify-center gap-2 py-2.5 px-3 rounded-full text-xs font-bold transition-all cursor-pointer select-none ${filtroRuta === 'visitados'
                     ? 'bg-[#2F3CB3] text-white shadow-xs'
                     : 'bg-[#F1F3F7] text-slate-700 hover:bg-slate-200'
-                }`}
+                  }`}
               >
                 <Icon name="circle-check" size={17} stroke={2.2} />
                 <span>Visitados ({visitados.length})</span>

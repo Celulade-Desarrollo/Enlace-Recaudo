@@ -39,6 +39,12 @@ import {
   IconCalendar,
   IconRefresh,
   IconChartBar,
+  IconUser,
+  IconEye,
+  IconEyeOff,
+  IconAlertCircle,
+  IconLogout,
+
   type TablerIcon
 } from '@tabler/icons-react';
 
@@ -81,7 +87,12 @@ export type IconName =
   | 'alert-triangle'
   | 'calendar'
   | 'refresh'
-  | 'chart-bar';
+  | 'chart-bar'
+  | 'user'
+  | 'eye'
+  | 'eye-off'
+  | 'alert-circle'
+  | 'logout';
 
 const iconMap: Record<IconName, TablerIcon> = {
   home: IconHome,
@@ -123,6 +134,12 @@ const iconMap: Record<IconName, TablerIcon> = {
   calendar: IconCalendar,
   refresh: IconRefresh,
   'chart-bar': IconChartBar,
+  user: IconUser,
+  eye: IconEye,
+  'eye-off': IconEyeOff,
+  'alert-circle': IconAlertCircle,
+  logout: IconLogout,
+
 };
 
 interface IconProps {
