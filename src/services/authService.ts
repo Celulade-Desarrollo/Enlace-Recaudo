@@ -1,10 +1,7 @@
-// ─────────────────────────────────────────────
-// Servicio de autenticación (dummy / hardcoded)
-// ─────────────────────────────────────────────
 
 const STORAGE_KEY = 'enlace_auth';
 
-// Credenciales quemadas para pruebas
+// Credenciales login dummy
 const DUMMY_USER = 'transportista';
 const DUMMY_PASS = 'enlace123';
 

@@ -15,11 +15,14 @@ type Props = {
 };
 
 export function SeleccionRutaScreen({ onContinuar }: Props) {
-    const [rutaId, setRutaId] = useState(() => {
-        const guardada = localStorage.getItem(CLAVE_RUTA);
-        return rutas.find((ruta) => ruta.id === guardada)?.id ?? '';
+    const [rutaRecordada] = useState(() => {
+        const idGuardado = localStorage.getItem(CLAVE_RUTA);
+        return rutas.find((ruta) => ruta.id === idGuardado) ?? null;
     });
-    const [recordar, setRecordar] = useState(Boolean(rutaId));
+
+    const [rutaId, setRutaId] = useState(rutaRecordada?.id ?? '');
+    const [recordar, setRecordar] = useState(rutaRecordada !== null);
+
     const [cargando, setCargando] = useState(false);
     const temporizador = useRef<number | null>(null);
 
@@ -44,7 +47,7 @@ export function SeleccionRutaScreen({ onContinuar }: Props) {
             }
 
             onContinuar(rutaId);
-        }, 4000);
+        }, 2000);
     }
 
     return (
@@ -116,7 +119,7 @@ export function SeleccionRutaScreen({ onContinuar }: Props) {
                             disabled={!rutaId}
                             className="mt-2 rounded-full bg-[#2F3CB3] px-4 py-3.5 text-sm font-bold text-white disabled:opacity-50"
                         >
-                            Continuar
+                            Iniciar ruta
                         </button>
                     </form>
                 )}

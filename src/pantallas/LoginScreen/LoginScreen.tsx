@@ -148,13 +148,6 @@ export const LoginScreen: React.FC = () => {
                             )}
                         </motion.button>
                     </form>
-
-                    {/* Footer hint */}
-                    <div className="mt-auto pt-8 text-center">
-                        <p className="text-[11px] text-slate-400">
-                            ¿Problemas para ingresar? Contacta al administrador
-                        </p>
-                    </div>
                 </div>
 
             </div>
